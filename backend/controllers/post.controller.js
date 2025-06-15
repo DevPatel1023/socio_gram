@@ -16,7 +16,7 @@ export const addNewPost = async(req,res)=>{
             })
         }
 
-        //image upload 
+        //image optimize and convert into jpeg format by reducing its size and quality then convert from buffer to datauri
         const optimizedImageBuffer = await sharp(image.buffer).resize({width:800,height:800,fit:'inside'}).toFormat('jpeg',{quality:80}).toBuffer();
 
         //buffer to datauri

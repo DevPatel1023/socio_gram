@@ -6,6 +6,8 @@ import getDataUri from "../utils/datauri.js";
 
 export const register = async (req, res) => {
     try {
+
+        //check the input fileds are empty or not 
         const { username, email, password } = req.body;
         if (!username || !email || !password) {
             return res.status(401).json({
@@ -13,21 +15,27 @@ export const register = async (req, res) => {
                 success: false
             });
         }
+
+        //if user with the same email Id try to create new account 
         const user = await User.findOne({ email });
         if (user) {
             return res.status(401).json({
-                msg: "Try different email id  ",
+                msg: "TUser with the email-Id already exists",
                 success: false
             });
         }
+
+        // hashed password for storing in the database 
         const hashedPassword = await bcrypt.hash(password, 10);
+
+        // user entry after all checks in db
         await User.create({
             username,
             email,
             password: hashedPassword
         });
         return res.status(201).json({
-            msg: "User added successfully",
+            msg: "User created successfully",
             success: true
         });
     } catch (error) {
@@ -37,6 +45,7 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
+        // Extract data from the body and check if it is empty or not
         const { email, password } = req.body;
         if (!email || !password) {
             return res.status(401).json({
@@ -44,17 +53,21 @@ export const login = async (req, res) => {
                 success: false
             });
         }
+
+        // finds user with given email is exists or not
         let user = await User.findOne({ email });
+        // If not exists create new user
         if (!user) {
             return res.status(401).json({
                 msg: "Incorrect email or password",
                 success: false
             });
         }
+        // if password match given access client data -- comparing hashed and given password 
         const ispassMatched = await bcrypt.compare(password, user.password);
         if (!ispassMatched) {
             return res.status(401).json({
-                msg: "Incorrect email or password",
+                msg: "Incorrect password",
                 success: false
             });
         }
@@ -70,7 +83,7 @@ export const login = async (req, res) => {
             posts: user.posts,
         }
 
-        //user authenticated
+        //user authenticated -- tokens
         const token = await jwt.sign({
             userId: user._id,
         },
