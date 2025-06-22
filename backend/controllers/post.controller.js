@@ -1,7 +1,8 @@
 import sharp from 'sharp';
 import cloudinary from '../utils/cloudinary.js';
 import { Post } from '../models/post.model.js';
-import { User } from '../models/user.model';
+import { User } from '../models/user.model.js';
+import { Comment } from '../models/comment.model.js';
 
 
 export const addNewPost = async(req,res)=>{
@@ -151,5 +152,106 @@ export const dislikepost = async (req,res) => {
         })
     } catch (error) {
         console.log(error);
+    }
+}
+
+// comment 
+export const addComment = async (req,res) => {
+    try {
+        const postId = req.params.id;
+        const commentUserId = req.id;
+        
+        const { text } = req.body ;
+        const post = await Post.findById(postId);
+
+        if(!text) { 
+            return res.status(400).json({
+                msg : 'text should not be empty!',
+                success : false
+            })
+        }
+
+        const comment = await Comment.create({
+            text,
+            author : commentUserId,
+            post : postId
+        }).populate({
+            path : 'author',
+            select : 'username , profilePicture'
+        });
+
+        // save comment's id in post -> model relationship and then save the post 
+        post.comments.push(comment._id);
+        await post.save();
+
+        return res.status(201).json({
+            message : 'comment added',
+            comment,
+            success : true
+        })
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// get post comment
+
+export const getCommentOfPost = async (req,res) => {
+    try {
+        const postId = req.params.id;
+        const comments = await Comment.find({post : postId}).populate('comment','username','profilePicture');
+
+        if(!comments){
+            return res.status(404).json({
+                message : 'No comments found for this post' ,
+                success : false
+            })
+        }
+
+        return res.status(200).json({
+            success : true,
+            comments
+        })
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// delete post
+export const deletePost = async (req,res) => {
+    try {
+        const postId = req.params.id ;
+        const authorId = req.id;
+
+        const post = await Post.findById(postId);
+        if(!post){
+            return res.status(404).json({
+                msg : 'Post not found',
+                success : false
+            })
+        }
+        // check if the login user is owner of the post
+        if(post.author.toString() !== authorId){
+            return res.status(403).json({
+                msg : 'unauthorized user'
+            })
+        }
+
+        // delete post
+        await Post.findByIdAndDelete(postId);
+        
+        // remove user model post id also
+        let user = await User.findById(authorId);
+        user.posts = user.posts.filter(id => id.toString() != postId );
+        await user.save();
+
+        // delete associated comments of post
+        await Comment.deleteMany({post : postId});
+        return res.status(200).json({
+            msg : "post deleted",
+            success : true
+        })
+    } catch (error) {
+        console.error(error);
     }
 }
