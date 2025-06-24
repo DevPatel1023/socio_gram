@@ -224,6 +224,7 @@ export const deletePost = async (req,res) => {
         const authorId = req.id;
 
         const post = await Post.findById(postId);
+        // post not found check
         if(!post){
             return res.status(404).json({
                 msg : 'Post not found',
@@ -242,7 +243,7 @@ export const deletePost = async (req,res) => {
         
         // remove user model post id also
         let user = await User.findById(authorId);
-        user.posts = user.posts.filter(id => id.toString() != postId );
+        user.posts = user.posts.filter(id => id.toString() !== postId );
         await user.save();
 
         // delete associated comments of post
@@ -251,6 +252,46 @@ export const deletePost = async (req,res) => {
             msg : "post deleted",
             success : true
         })
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// bookmark post
+export const bookmarkPost = async (req,res) => {
+    try {
+        // find post id and user who save that post
+        const postId = req.params.id;
+        const authorId = req.id;
+
+        const post = await Post.findById(postId);
+        if(!post){
+            return res.status(404).json({
+                msg : "Post not found",
+                success : false
+            });
+        }
+        const user = await User.findById(authorId);
+        
+        if(user.bookmarks.includes(post._id)){
+            // post already bookmark so remove it
+            await user.bookmarks.updateOne({$pull : {bookmarks : post._id}});
+            await user.save();
+            return res.status(200).json({
+                type : 'unsaved',
+                msg : "post removed from bookmark",
+                success : true
+            });
+        }else{
+            // bookmark the post
+             await user.bookmarks.updateOne({$addToSet : {bookmarks : post._id}});
+            await user.save();
+            return res.status(200).json({
+                type : 'unsaved',
+                msg : "post saved to bookmark",
+                success : true
+            });
+        }
     } catch (error) {
         console.error(error);
     }
