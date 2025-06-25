@@ -16,7 +16,7 @@ export const sendMesssage = async (req,res) => {
     //    establish the convo if not started yet
     if(!conversation){
         conversation = await Conversation.create({
-            participants : [senderId,receiverId];
+            participants : [senderId,receiverId]
         }) ;
     }
     const newMessage = await Message.create({
@@ -46,7 +46,22 @@ export const getMessage = async (req,res) => {
         const senderId = req.id;
         const receiverId = req.params.id;
 
-        
+        const conversation = await Conversation.find({
+            participants : {$all : [senderId , receiverId]}
+        });
+
+        // check if not conversation
+        if(!conversation){
+            return res.status(200).json({
+                success : true ,
+                messages : []
+            });
+        }
+
+        return res.status(200).json({
+            success : true ,
+            messages : conversation?.messages 
+        });
     } catch (error) {
         console.log(error);
     }
