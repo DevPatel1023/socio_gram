@@ -71,7 +71,16 @@ export const login = async (req, res) => {
                 success: false
             });
         }
+         //user authenticated -- tokens
+        const token = await jwt.sign({
+            userId: user._id,
+        },
+            process.env.SECRET_KEY,
+            { expiresIn: '1d' }
+        );
 
+        //  populate each post if in the post array of user
+        const populatedPosts = await Promise.all()
         user = {
             _id: user._id,
             username: user.username,
@@ -82,14 +91,6 @@ export const login = async (req, res) => {
             following: user.following,
             posts: user.posts,
         }
-
-        //user authenticated -- tokens
-        const token = await jwt.sign({
-            userId: user._id,
-        },
-            process.env.SECRET_KEY,
-            { expiresIn: '1d' }
-        );
 
         return res.cookie('token', token, { httpOnly: true, sameSite: 'strict', maxAge: 1 * 24 * 60 * 60 * 1000 }).json({
             message: `welcome ${user.username}`,
