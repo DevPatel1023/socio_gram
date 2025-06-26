@@ -1,4 +1,5 @@
 import { User } from "../models/user.model.js";
+import { Post } from "../models/post.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import  cloudinary  from '../utils/cloudinary.js';
@@ -80,7 +81,9 @@ export const login = async (req, res) => {
         );
 
         //  populate each post if in the post array of user
-        const populatedPosts = await Promise.all()
+        const populatedPosts = await Post.find({
+            author : user._id
+        })
         user = {
             _id: user._id,
             username: user.username,
