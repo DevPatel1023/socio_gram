@@ -6,9 +6,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
-const signup = () => {
+const Login = () => {
   const [input, setInput] = useState({
-    username: "",
     email: "",
     password: "",
   });
@@ -17,13 +16,13 @@ const signup = () => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
 
-  const signUpHandler = async (e) => {
+  const LoginHandler = async (e) => {
     // prevent the refreshing page when user submits data on onSubmit event
     e.preventDefault();
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:8000/api/v1/user/register",
+        "http://localhost:8000/api/v1/user/login",
         input,
         {
           headers: {
@@ -34,11 +33,12 @@ const signup = () => {
       );
       if (response.data.success) {
         toast.success(response.data.message);
+        // after submitting data successful to backend clear states
         setInput({
-          username: "",
           email: "",
           password: "",
         });
+        // Redirect the user
       }
     } catch (error) {
       console.log(error);
@@ -50,26 +50,14 @@ const signup = () => {
   return (
     <div className="flex items-center w-screen h-screen justify-center">
       <form
-        onSubmit={signUpHandler}
+        onSubmit={LoginHandler}
         className="shadow-lg flex flex-col gap-5 p-8"
       >
         <div className="my-4">
           <h1 className="text-center font-bold text-xl">logo</h1>
           <p className="text-sm text-center">
-            Signup to see photos & videos from your friend
+            Login to see photos & videos from your friend
           </p>
-        </div>
-        <div>
-          <Label className="font-medium">Username</Label>
-          <Input
-            type="text"
-            name="username"
-            value={input.username}
-            onChange={changeInputHandler}
-            className="focus-visible:ring-transparent my-2"
-            placeholder="jhon doe"
-            required
-          />
         </div>
         <div>
           <Label className="font-medium">Email</Label>
@@ -95,13 +83,11 @@ const signup = () => {
             required
           />
         </div>
-        <Button type="submit" disabled={loading}>
-          {loading ? "signing in..." : "Signup"}
-        </Button>
+        <Button type="submit" disabled={loading}>{loading ? "logging in..." : "Login"}</Button>
         <span className="text-center">
-          Already have an account ?{" "}
-          <Link className="text-blue-500 hover:underline" to="/login">
-            Login
+          Don't have an account {" "}
+          <Link className="text-blue-500 hover:underline" to="/signup">
+            signup
           </Link>
         </span>
       </form>
@@ -109,4 +95,4 @@ const signup = () => {
   );
 };
 
-export default signup;
+export default Login;
