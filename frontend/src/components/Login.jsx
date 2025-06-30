@@ -4,13 +4,15 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Loader, Loader2 } from "lucide-react";
 
 const Login = () => {
   const [input, setInput] = useState({
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const changeInputHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -32,13 +34,14 @@ const Login = () => {
         }
       );
       if (response.data.success) {
+        // Redirect the user
+        navigate("/");
         toast.success(response.data.message);
         // after submitting data successful to backend clear states
         setInput({
           email: "",
           password: "",
-        });
-        // Redirect the user
+        });  
       }
     } catch (error) {
       console.log(error);
@@ -83,6 +86,11 @@ const Login = () => {
             required
           />
         </div>
+        {/* {loading ? (
+          <Button><Loader2 className="mr-2 h-4 w-4 animate-spin"/>please wait</Button>
+        ) : (
+           <Button type="submit" disabled={loading}>{loading ? "logging in..." : "Login"}</Button>
+        )} */}
         <Button type="submit" disabled={loading}>{loading ? "logging in..." : "Login"}</Button>
         <span className="text-center">
           Don't have an account {" "}

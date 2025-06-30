@@ -4,7 +4,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const signup = () => {
   const [input, setInput] = useState({
@@ -12,6 +12,7 @@ const signup = () => {
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const changeInputHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -33,6 +34,8 @@ const signup = () => {
         }
       );
       if (response.data.success) {
+        // redirect to login
+        navigate("/login");
         toast.success(response.data.message);
         setInput({
           username: "",
