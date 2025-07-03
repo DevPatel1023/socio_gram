@@ -10,9 +10,14 @@ const StorySchema = new mongoose.Schema({
         type : String,
         required : true
     },
+    type: {
+    type: String,
+    enum: ["image", "video"],
+    required: true,
+  },
     createdAt : {
-        type : Date.now,
-        required : true
+        type : Date,
+        default : Date.now
     },
     viewers : {
         type : mongoose.Schema.Types.ObjectId,
