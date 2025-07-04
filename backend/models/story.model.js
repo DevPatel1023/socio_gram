@@ -19,11 +19,11 @@ const StorySchema = new mongoose.Schema({
         type : Date,
         default : Date.now
     },
-    viewers : {
+    viewers : [{
         type : mongoose.Schema.Types.ObjectId,
         ref : "User",
-    },
+    }],
 });
 
-const Story = mongoose.model(StorySchema);
+const Story = mongoose.model("Story",StorySchema);
 export default Story;
