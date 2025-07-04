@@ -95,7 +95,8 @@ export const deleteUserStory = async (req,res) => {
 
         const response = await story.deleteOne();
         return res.status(200).json({
-            message : "story deleted"
+            message : "story deleted",
+            response
         });
     } catch (error) {
         console.log(error);
