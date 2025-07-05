@@ -1,10 +1,12 @@
 // 1. post story
 // 2. get story -> the users who follows get the story
 // 3. get story for user itself 
-import { log } from "console";
-import Story from "../models/story.model";
-import cloudinary from "../utils/cloudinary";
-import getDataUri from "../utils/datauri";
+
+import Story from "../models/story.model.js";
+import cloudinary from "../utils/cloudinary.js";
+import getDataUri from "../utils/datauri.js";
+import {User} from "../models/user.model.js";  
+
 
 export const addNewStory = async (req,res) => {
     try {
@@ -15,7 +17,7 @@ export const addNewStory = async (req,res) => {
         }
 
         // convert to data uri
-        const mediaUrl = getDataUri(file);
+        const mediaUrl = getDataUri(media);
         // upload to cloudinary
         const result = await cloudinary.uploader.upload(mediaUrl,{
             resource_type : "auto",
@@ -24,7 +26,7 @@ export const addNewStory = async (req,res) => {
         const story = await Story.create({
             user : userId,
             mediaUrl : result.secure_url,
-            type: file.mimetype.startsWith("video") ? "video" : "image",
+            type: media.mimetype.startsWith("video") ? "video" : "image",
         });
 
         return res.status(200).json({
@@ -37,26 +39,52 @@ export const addNewStory = async (req,res) => {
     }
 } 
 
-export const getallUsersStory = async (req,res) => {
+export const getallUsersStory = async (req, res) => {
     try {
-        // fetch the user's following list
-        const user = await UserActivation.findById(req.id).select("following");
-        // then find stories of those user in the last 24 hrs
+        // Fetch the user's following list
+        const user = await User.findById(req.id).select("following");
+        
+        if (!user) {
+            console.log(user);
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        // Check if user is following anyone
+        if (!user.following || user.following.length === 0) {
+            return res.status(200).json({
+                success: true,
+                stories: [],
+                message: "No stories available. Start following users to see their stories."
+            });
+        }
+
+        // Find stories of followed users in the last 24 hours
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
         const stories = await Story.find({
-            user : { $in : user.following},
-            createdAt : { $gte: oneDayAgo},
-        }).populate("user");
-
-        return res.status(200).json({
-            success : true ,
-            stories
+            user: { $in: user.following },
+            createdAt: { $gte: oneDayAgo }
         })
+        .populate("user", "username profilePicture _id")
+        .sort({ createdAt: -1 }); // Sort by newest first
+        
+        return res.status(200).json({
+            success: true,
+            stories,
+            count: stories.length
+        });
+
     } catch (error) {
-        console.log("error while fetching user story",error);
+        console.log("Error while fetching user stories:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error while fetching stories"
+        });
     }
-} 
+};
 
 export const getUserStory = async(req,res) => {
     try {
@@ -124,6 +152,40 @@ export const markstoryAsViwed = async (req,res) =>{
             success : true,
             message : 'view recorded'
         })
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const getStoryViewers = async(req,res) =>{
+    try {
+        // pass the story id by params
+        const story = await Story.findById(req.params.id);
+        // check the story exists
+        if(!story){
+            return res.status(404).json({
+                message : "story not exists"
+            });
+        }
+
+        // check if the requesting user is story owner
+        if(story.user._id.toString() === req.id){
+            return res.status(403).json({
+                success : false,
+                message : "unauthorized access"
+            });
+        }
+       
+        return res.status(200).json({
+            success : true,
+            story : {
+                id : story._id,
+                owner : story.user.username,
+                viewers : story.viewers,
+                viewCount : story.viewers.length
+            }
+        });
+
     } catch (error) {
         console.log(error);
     }

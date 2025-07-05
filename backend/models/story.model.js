@@ -15,15 +15,11 @@ const StorySchema = new mongoose.Schema({
     enum: ["image", "video"],
     required: true,
   },
-    createdAt : {
-        type : Date,
-        default : Date.now
-    },
     viewers : [{
         type : mongoose.Schema.Types.ObjectId,
         ref : "User",
     }],
-});
+}, { timestamps: true });
 
 const Story = mongoose.model("Story",StorySchema);
 export default Story;

@@ -6,6 +6,7 @@ import connectDB from './utils/db.js';
 import userRouter from "./routes/user.route.js"
 import postRoute from "./routes/post.route.js";
 import messageRoute from "./routes/message.route.js";
+import storyRoute from "./routes/story.route.js";
 dotenv.config({});
 
 const app = express();
@@ -32,6 +33,7 @@ app.use(cors(corsOptions));
 app.use('/api/v1/user',userRouter);
 app.use('/api/v1/post',postRoute);
 app.use('/api/v1/message',messageRoute);
+app.use('/api/v1/story',storyRoute);
 
 app.listen(PORT,()=>{
     connectDB()
