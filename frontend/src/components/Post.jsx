@@ -1,72 +1,215 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import React from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { BookMarked, MoreHorizontal } from "lucide-react";
+import { Bookmark, MoreHorizontal } from "lucide-react";
 import { Button } from "./ui/button";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { MessageCircle, Send } from "lucide-react";
 import Commentdialog from "./Commentdialog";
 
-const Post = () => {
+const Post = ({ 
+  user = {
+    username: "username",
+    avatar: "",
+    isFollowing: false
+  },
+  post = {
+    image: "https://images.unsplash.com/photo-1484406566174-9da000fda645?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGFuaW1hbHN8ZW58MHx8MHx8fDA%3D",
+    caption: "Beautiful sunset today! 🌅",
+    likes: 1247,
+    comments: 23,
+    isLiked: false,
+    isBookmarked: false,
+    timestamp: "2h"
+  }
+}) => {
+  const [isLiked, setIsLiked] = useState(post.isLiked);
+  const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
+  const [likesCount, setLikesCount] = useState(post.likes);
+  const [comment, setComment] = useState("");
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+  };
+
+  const handleBookmark = () => {
+    setIsBookmarked(!isBookmarked);
+  };
+
+  const handleComment = () => {
+    if (comment.trim()) {
+      // Handle comment submission
+      setComment("");
+    }
+  };
+
+  const formatLikes = (count) => {
+    if (count >= 1000000) {
+      return (count / 1000000).toFixed(1) + 'M';
+    } else if (count >= 1000) {
+      return (count / 1000).toFixed(1) + 'k';
+    }
+    return count.toString();
+  };
+
   return (
-    <div className="my-8 w-full max-w-sm mx-auto">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <Avatar>
-            <AvatarImage src="" alt="post_image" />
-            <AvatarFallback>cv</AvatarFallback>
+    <div className="my-8 w-full max-w-sm mx-auto bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 px-1">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user.avatar} alt={`${user.username}'s avatar`} />
+            <AvatarFallback className="text-xs font-medium">
+              {user.username.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
-          <h1>username</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-sm font-semibold">{user.username}</h1>
+            <span className="text-gray-500 text-xs">•</span>
+            <span className="text-gray-500 text-xs">{post.timestamp}</span>
+          </div>
         </div>
         <Dialog>
           <DialogTrigger asChild>
-            <MoreHorizontal className="cursor-pointer" />
+            <button 
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              aria-label="More options"
+            >
+              <MoreHorizontal className="cursor-pointer w-5 h-5" />
+            </button>
           </DialogTrigger>
-          <DialogContent className="flex flex-col items-center text-sm text-center">
+          <DialogContent className="flex flex-col items-center text-sm text-center w-80">
             <Button
               variant="ghost"
-              className="cursor-pointer w-fit text-[#ED4956] font-bold"
+              className="cursor-pointer w-full text-[#ED4956] font-bold hover:bg-gray-50"
             >
-              unfollow
+              {user.isFollowing ? "Unfollow" : "Follow"}
             </Button>
-            <Button variant="ghost" className="cursor-pointer w-fit ">
+            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
               Add to favorites
             </Button>
-            <Button variant="ghost" className="cursor-pointer w-fit">
-              delete
+            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
+              Copy link
+            </Button>
+            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
+              Share to...
+            </Button>
+            <Button variant="ghost" className="cursor-pointer w-full text-[#ED4956] hover:bg-gray-50">
+              Report
             </Button>
           </DialogContent>
         </Dialog>
       </div>
-      <img
-        className="rounded-sm my-2 w-full aspect-square object-cover"
-        src="https://images.unsplash.com/photo-1484406566174-9da000fda645?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGFuaW1hbHN8ZW58MHx8MHx8fDA%3D"
-        alt="post_img"
-      />
-        <div className="flex items-center justify-between my-2">
-          <div className="flex items-center gap-3">
-            <FaRegHeart
-              size={"22px"}
-              className="cursor-pointer hover:text-gray-600"
-            />
-            <MessageCircle className="cursor-pointer hover:text-gray-600" />
-            <Send className="cursor-pointer hover:text-gray-600" />
-          </div>
 
-          <BookMarked className="cursor-pointer hover:text-gray-600" />
-        </div>
-        <span className="font-medium block mb-2">1k likes</span>
-        <p>
-          <span className="font-medium mr-2">username</span>
-          postcaption
-        </p>
-        <span>View all 10 comments</span>
-        <Commentdialog />
-        <div>
-          <input type="text" placeholder="add a comment" className="outline-none text-sm w-full" />
-          <span className="text-[#3BADF8]">Post </span>
-        </div>
+      {/* Post Image */}
+      <div className="relative">
+        <img
+          className="rounded-sm w-full aspect-square object-cover border border-gray-200"
+          src={post.image}
+          alt="Post content"
+          loading="lazy"
+        />
       </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center justify-between my-3 px-1">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleLike}
+            className="p-1 hover:bg-gray-100 rounded-full transition-all duration-200"
+            aria-label={isLiked ? "Unlike post" : "Like post"}
+          >
+            {isLiked ? (
+              <FaHeart 
+                size="24" 
+                className="text-red-500 cursor-pointer animate-pulse" 
+              />
+            ) : (
+              <FaRegHeart
+                size="24"
+                className="cursor-pointer hover:text-gray-600 transition-colors"
+              />
+            )}
+          </button>
+          <button
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Comment on post"
+          >
+            <MessageCircle className="cursor-pointer hover:text-gray-600 w-6 h-6" />
+          </button>
+          <button
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Share post"
+          >
+            <Send className="cursor-pointer hover:text-gray-600 w-6 h-6" />
+          </button>
+        </div>
+
+        <button
+          onClick={handleBookmark}
+          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+          aria-label={isBookmarked ? "Remove bookmark" : "Bookmark post"}
+        >
+          <Bookmark 
+            className={`cursor-pointer hover:text-gray-600 w-6 h-6 transition-colors ${
+              isBookmarked ? 'fill-current' : ''
+            }`}
+          />
+        </button>
+      </div>
+
+      {/* Likes Count */}
+      <div className="px-1 mb-2">
+        <span className="font-semibold text-sm">
+          {formatLikes(likesCount)} {likesCount === 1 ? 'like' : 'likes'}
+        </span>
+      </div>
+
+      {/* Caption */}
+      <div className="px-1 mb-2">
+        <p className="text-sm">
+          <span className="font-semibold mr-2">{user.username}</span>
+          {post.caption}
+        </p>
+      </div>
+
+      {/* Comments */}
+      <div className="px-1 mb-2">
+        <button className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+          View all {post.comments} comments
+        </button>
+      </div>
+
+      <Commentdialog />
+
+      {/* Add Comment */}
+      <div className="flex items-center border-t pt-3 mt-3">
+        <input
+          type="text"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Add a comment..."
+          className="text-sm flex-1 px-3 py-2 focus:outline-none"
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              handleComment();
+            }
+          }}
+        />
+        <button
+          onClick={handleComment}
+          disabled={!comment.trim()}
+          className={`ml-2 text-sm font-semibold px-3 py-2 rounded transition-colors ${
+            comment.trim()
+              ? 'text-[#3BADF8] hover:text-[#1d9bf0] cursor-pointer'
+              : 'text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          Post
+        </button>
+      </div>
+    </div>
   );
 };
 
