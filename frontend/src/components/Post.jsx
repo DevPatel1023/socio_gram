@@ -27,6 +27,7 @@ const Post = ({
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
   const [likesCount, setLikesCount] = useState(post.likes);
   const [comment, setComment] = useState("");
+  const [open,setOpen] = useState(false);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -136,7 +137,7 @@ const Post = ({
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             aria-label="Comment on post"
           >
-            <MessageCircle className="cursor-pointer hover:text-gray-600 w-6 h-6" />
+            <MessageCircle className="cursor-pointer hover:text-gray-600 w-6 h-6" onClick={()=>setOpen(true)} />
           </button>
           <button
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -176,12 +177,12 @@ const Post = ({
 
       {/* Comments */}
       <div className="px-1 mb-2">
-        <button className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+        <button className="text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer" onClick={()=>setOpen(true)} >
           View all {post.comments} comments
         </button>
       </div>
 
-      <Commentdialog />
+      <Commentdialog open={open} setOpen={setOpen} />
 
       {/* Add Comment */}
       <div className="flex items-center border-t pt-3 mt-3">
