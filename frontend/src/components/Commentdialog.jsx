@@ -1,9 +1,26 @@
-import React from "react";
-import { Dialog, DialogContent } from "./ui/dialog";
+import React, { useState } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Link } from "react-router-dom";
+import { MoreHorizontal } from "lucide-react";
+import { Button } from "./ui/button";
 
 const Commentdialog = ({ open, setOpen }) => {
+  const [text , setText] = useState("");
+
+  const changeEventHandler = (e)=>{
+    const inputText = e.target.value;
+    if(inputText.trim()){
+      setText(inputText);
+    }
+    else{
+      setText("");
+    }
+  }
+
+  const sendCommentHandler = async() => {
+    alert(text);
+  }
   return (
     <Dialog open={open}>
       <DialogContent
@@ -22,17 +39,40 @@ const Commentdialog = ({ open, setOpen }) => {
           <div className="w-1/2 flex flex-col justify-between">
             <div className="flex items-center justify-between p-4">
               <div className="flex gap-3 items-center">
-              <Link>
-                <Avatar>
-                  <AvatarImage src="" />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-              </Link>
-              <div>
-                <Link className="font-semibold text-sm">username</Link>
+                <Link>
+                  <Avatar>
+                    <AvatarImage src="" />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                </Link>
+                <div>
+                  <Link className="font-semibold text-sm">username</Link>
+                </div>
               </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <MoreHorizontal className="cursor-pointer" />
+                </DialogTrigger>
+                <DialogContent>
+                  <div className="cursor-pointer w-full text-[#ED4956] text-center hover:bg-gray-200">
+                    UnFollow
+                  </div>
+                  <div className="cursor-pointer w-full text-center hover:bg-gray-200">
+                    Add to favourites
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <hr />
+            {/* comments */}
+            <div className="flex-1 overflow-y-auto max-h-96 p-4 flex-row">
+              cccc
+            </div>
+            <div className="p-4">
+              <div className="flex items-center gap-2">
+                <input type="text" placeholder="add a comment..." className="w-full outline-none border focus:border-gray-500 p-2 rounded" onChange={changeEventHandler} value={text} />
+                <Button disabled={!text.trim()} onClick={sendCommentHandler} variant="outline">Send</Button>
               </div>
-              <Dialog
             </div>
           </div>
         </div>
