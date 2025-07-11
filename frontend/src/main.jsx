@@ -1,16 +1,29 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-import { Toaster } from 'sonner'
-import { Provider } from 'react-redux'
-import store from './redux/store'
+// redux/store.js
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+import userReducer from './slices/userSlice';
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <Provider store={store}>
-    <App />
-    </Provider>
-    <Toaster />
-  </StrictMode>,
-)
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['user'],
+};
+
+const rootReducer = combineReducers({
+  user: userReducer,
+});
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
+});
+
+const persistor = persistStore(store);
+
+export { store, persistor }; // ✅ Correct named exports

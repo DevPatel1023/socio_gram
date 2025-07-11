@@ -33,6 +33,8 @@ const Sidebar = () => {
         navigate("/login");
         toast.success(res.data.message);
       }
+      console.log("Profile picture URL:", user?.profilePicture);
+
     } catch (error) {
       toast.error(error.response?.data?.message || "Logout failed");
     } finally {
@@ -80,7 +82,7 @@ const Sidebar = () => {
           </AvatarFallback>
         </Avatar>
       ),
-      text: "Profile",
+      text: user?.username,
       link: "/profile",
     },
   ];
