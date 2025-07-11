@@ -1,7 +1,7 @@
 // user global state
 import {createSlice} from "@reduxjs/toolkit" ;  
 
-const authSlide = createSlice({
+const authSlice = createSlice({
     name : "auth" ,
     initialState : {
         user : null
@@ -13,6 +13,6 @@ const authSlide = createSlice({
     }
 });
 
-export const {setAuthUser} = authSlide.actions;
+export const {setAuthUser} = authSlice.actions;
 
-export default authSlide.actions;
+export default authSlice.reducer;

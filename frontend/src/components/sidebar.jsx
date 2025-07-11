@@ -13,11 +13,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { toast } from "sonner";
 import axios from "axios";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+  const {user} = useSelector((store)=>store.auth);
 
   const logoutHandler = async () => {
     if (isLoading) return;
@@ -72,7 +74,7 @@ const Sidebar = () => {
     {
       icon: (
         <Avatar className="w-6 h-6">
-          <AvatarImage className='w-6 h-6' />
+          <AvatarImage src={user?.profilePicture} className='w-6 h-6' alt="profilepic" />
           <AvatarFallback>
             <User size={16} />
           </AvatarFallback>
