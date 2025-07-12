@@ -13,13 +13,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { toast } from "sonner";
 import axios from "axios";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setAuthUser } from "@/redux/authSlide";
+import CreatePost from "./CreatePost";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const {user} = useSelector((store)=>store.auth);
+  const dispatch = useDispatch();
+  const[open,setOpen] = useState(false);
+
+  const createPostHandler = () => {
+    setOpen(true);
+  }
 
   const logoutHandler = async () => {
     if (isLoading) return;
@@ -30,11 +38,10 @@ const Sidebar = () => {
         withCredentials: true,
       });
       if (res.data.success) {
+        dispatch(setAuthUser(null));
         navigate("/login");
         toast.success(res.data.message);
       }
-      console.log("Profile picture URL:", user?.profilePicture);
-
     } catch (error) {
       toast.error(error.response?.data?.message || "Logout failed");
     } finally {
@@ -205,6 +212,8 @@ const Sidebar = () => {
 
       {/* Mobile spacing for bottom nav */}
       <div className="h-16 md:hidden" />
+
+      <CreatePost open={open} setOpen={setOpen} />
     </>
   );
 };
