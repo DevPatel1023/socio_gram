@@ -1,17 +1,120 @@
-import React from "react";
-import { Dialog, DialogContent } from "./ui/dialog";
-import { asyncThunkCreator } from "@reduxjs/toolkit";
+import React, { useRef, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "./ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Textarea } from "./ui/textarea";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { readFileAsDataURL } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import axios from "axios";
 
 const CreatePost = ({ open, setOpen }) => {
-  const createPostHandler = async (e) => {
-    e.preventDefault();
-    try {
-    } catch (error) {}
-  };
+  const imageRef = useRef();
+  const [file,setFile] = useState("");
+  const [caption,setCaption] = useState("");
+  const [imagePreview,setImagePreview] = useState("");
+  const [loading,setLoading] = useState(false);
+
+const createPostHandler = async (e) => {
+  e.preventDefault(); // Good practice
+  setLoading(true);
+
+  const formData = new FormData();
+  formData.append("caption", caption);
+  if (file) {
+    formData.append("image", file);
+  }
+
+  try {
+    const res = await axios.post(
+      "http://localhost:8000/api/v1/post/addpost",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      }
+    );
+
+    if (res?.data?.success) {
+      toast.success(res.data.message || "Post created!");
+      setCaption("");
+      setImagePreview("");
+      setFile(null);
+      setOpen(false); // Close the dialog after success
+    }
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Something went wrong while creating the post.";
+    toast.error(message);
+    console.error("Create Post Error:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const fileChangehandler = async (e) => {
+  const fileinput = e.target.files?.[0];
+  if (fileinput) {
+    setFile(fileinput); // Save to state 
+    const dataURL = await readFileAsDataURL(fileinput); 
+    setImagePreview(dataURL);
+  }
+};
+
+
   return (
     <Dialog open={open}>
       <DialogContent onInteractOutside={() => setOpen(false)}>
-        <form onSubmit={createPostHandler}>Hello</form>
+        <DialogTitle className="text-center font-semibold">
+          Create New Post
+        </DialogTitle>
+        <DialogDescription className="text-center text-sm text-muted-foreground">
+          Share an update with your followers.
+        </DialogDescription>
+
+        <div className="flex gap-3 items-center mt-4">
+          <Avatar>
+            <AvatarImage src="" alt="img" />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="font-semibold text-xs">username</h1>
+            <span className="text-gray-600">Bio here...</span>
+          </div>
+        </div>
+
+        <Textarea value={caption} onChange={(e)=> setCaption(e.target.value)}
+          className="focus:visible:ring-transparent border-none mt-3"
+          placeholder="Write a caption..."
+        />
+        {imagePreview && (
+          <div className="w-full h-64 flex items-center justify-center">
+            <img src={imagePreview} alt="preview_img" className="object-cover h-full w-full rounded-md"/>
+          </div>
+        )} 
+        <Input ref={imageRef} type="file" onChange={fileChangehandler}
+         className="hidden" />     
+        <Button onClick={()=> imageRef.current.click()} className="w-fit mx-auto bg-[#0095F6] hover:bg-[#6c5fff]">
+          Select from local device
+        </Button>
+        {imagePreview && ( loading ? (
+          <Button><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Please wait</Button>
+        ) : (
+          <Button onClick={createPostHandler} type="submit" className="w-full">
+          Post
+        </Button>
+        ) )}
       </DialogContent>
     </Dialog>
   );
