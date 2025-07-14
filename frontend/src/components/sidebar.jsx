@@ -25,8 +25,9 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const[open,setOpen] = useState(false);
 
-  const createPostHandler = () => {
-    setOpen(true);
+  const createPostHandler = (e) => {
+    e.preventDefault(); // Prevent any default behavior
+    setOpen(true); // Open the dialog
   }
 
   const logoutHandler = async () => {
@@ -54,31 +55,37 @@ const Sidebar = () => {
       icon: <Home size={24} />,
       text: "Home",
       link: "/",
+      type: "link"
     },
     {
       icon: <Search size={24} />,
       text: "Search",
       link: "/search",
+      type: "link"
     },
     {
       icon: <TrendingUp size={24} />,
       text: "Explore",
       link: "/explore",
+      type: "link"
     },
     {
       icon: <MessageCircle size={24} />,
       text: "Messages",
       link: "/messages",
+      type: "link"
     },
     {
       icon: <Heart size={24} />,
       text: "Notifications",
       link: "/notifications",
+      type: "link"
     },
     {
       icon: <PlusSquare size={24} />,
       text: "Create",
-      link: "/create",
+      onClick: createPostHandler,
+      type: "button" // This is a button, not a link
     },
     {
       icon: (
@@ -89,8 +96,9 @@ const Sidebar = () => {
           </AvatarFallback>
         </Avatar>
       ),
-      text: user?.username,
+      text: user?.username || "Profile",
       link: "/profile",
+      type: "link"
     },
   ];
 
@@ -98,6 +106,15 @@ const Sidebar = () => {
     if (link === "/" && location.pathname === "/") return true;
     if (link !== "/" && location.pathname.startsWith(link)) return true;
     return false;
+  };
+
+  // Shared base classes for both links and buttons
+  const getBaseClasses = (item) => {
+    return `group flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full ${
+      item.type === "link" && isActiveLink(item.link)
+        ? "bg-gradient-to-r from-purple-50 to-pink-50 text-purple-600 shadow-sm"
+        : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+    }`;
   };
 
   return (
@@ -118,31 +135,49 @@ const Sidebar = () => {
 
         {/* Navigation Items */}
         <nav className="flex-1 px-3 py-6 space-y-2">
-          {navItems.map((item, index) => (
-            <Link
-              key={index}
-              to={item.link}
-              className={`group flex items-center px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                isActiveLink(item.link)
-                  ? "bg-gradient-to-r from-purple-50 to-pink-50 text-purple-600 shadow-sm"
-                  : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              <span
-                className={`flex-shrink-0 transition-colors duration-200 ${
-                  isActiveLink(item.link) ? "text-purple-600" : "text-gray-500"
-                }`}
-              >
-                {item.icon}
-              </span>
-              <span className="ml-3 hidden lg:block truncate">
-                {item.text}
-              </span>
-              {isActiveLink(item.link) && (
-                <div className="ml-auto w-2 h-2 bg-purple-600 rounded-full hidden lg:block" />
-              )}
-            </Link>
-          ))}
+          {navItems.map((item, index) => {
+            const baseClasses = getBaseClasses(item);
+
+            if (item.type === "link") {
+              return (
+                <Link
+                  key={index}
+                  to={item.link}
+                  className={baseClasses}
+                >
+                  <span
+                    className={`flex-shrink-0 transition-colors duration-200 ${
+                      isActiveLink(item.link) ? "text-purple-600" : "text-gray-500"
+                    }`}
+                  >
+                    {item.icon}
+                  </span>
+                  <span className="ml-3 hidden lg:block truncate">
+                    {item.text}
+                  </span>
+                  {isActiveLink(item.link) && (
+                    <div className="ml-auto w-2 h-2 bg-purple-600 rounded-full hidden lg:block" />
+                  )}
+                </Link>
+              );
+            } else {
+              // For button items like "Create" - now has consistent spacing
+              return (
+                <button
+                  key={index}
+                  onClick={item.onClick}
+                  className={baseClasses}
+                >
+                  <span className="flex-shrink-0 text-gray-500 transition-colors duration-200 group-hover:text-gray-900">
+                    {item.icon}
+                  </span>
+                  <span className="ml-3 hidden lg:block truncate">
+                    {item.text}
+                  </span>
+                </button>
+              );
+            }
+          })}
         </nav>
 
         {/* Logout Button */}
@@ -165,25 +200,44 @@ const Sidebar = () => {
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-30 px-2 py-2 shadow-lg">
         <div className="flex justify-around items-center max-w-md mx-auto">
-          {navItems.slice(0, 5).map((item, index) => (
-            <Link
-              key={index}
-              to={item.link}
-              className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 ${
-                isActiveLink(item.link)
-                  ? "text-purple-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <span className="mb-1 scale-90">{item.icon}</span>
-              <span className="text-xs font-medium leading-none">
-                {item.text}
-              </span>
-              {isActiveLink(item.link) && (
-                <div className="absolute -top-1 w-1 h-1 bg-purple-600 rounded-full" />
-              )}
-            </Link>
-          ))}
+          {navItems.slice(0, 5).map((item, index) => {
+            const baseClasses = `flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 ${
+              item.type === "link" && isActiveLink(item.link)
+                ? "text-purple-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`;
+
+            if (item.type === "link") {
+              return (
+                <Link
+                  key={index}
+                  to={item.link}
+                  className={baseClasses}
+                >
+                  <span className="mb-1 scale-90">{item.icon}</span>
+                  <span className="text-xs font-medium leading-none">
+                    {item.text}
+                  </span>
+                  {isActiveLink(item.link) && (
+                    <div className="absolute -top-1 w-1 h-1 bg-purple-600 rounded-full" />
+                  )}
+                </Link>
+              );
+            } else {
+              return (
+                <button
+                  key={index}
+                  onClick={item.onClick}
+                  className={baseClasses}
+                >
+                  <span className="mb-1 scale-90">{item.icon}</span>
+                  <span className="text-xs font-medium leading-none">
+                    {item.text}
+                  </span>
+                </button>
+              );
+            }
+          })}
           
           {/* Mobile Profile Menu */}
           <Link
@@ -196,7 +250,7 @@ const Sidebar = () => {
           >
             <span className="mb-1 scale-90">
               <Avatar className="w-6 h-6">
-                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarImage src={user?.profilePicture} className='w-6 h-6' alt="profilepic" />
                 <AvatarFallback>
                   <User size={14} />
                 </AvatarFallback>
@@ -213,6 +267,7 @@ const Sidebar = () => {
       {/* Mobile spacing for bottom nav */}
       <div className="h-16 md:hidden" />
 
+      {/* CreatePost Dialog - This will show when open=true */}
       <CreatePost open={open} setOpen={setOpen} />
     </>
   );
