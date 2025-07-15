@@ -6,16 +6,22 @@ import { Button } from "./ui/button";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { MessageCircle, Send } from "lucide-react";
 import Commentdialog from "./Commentdialog";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import store from "@/redux/store";
+import { toast } from "sonner";
+import axios from "axios";
+import { setPosts } from "@/redux/postSlice";
 
-const Post = ({post}) => {
+const Post = ({ post }) => {
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
   const [comment, setComment] = useState("");
   const [open, setOpen] = useState(false);
-  const user = useSelector((store) => store.auth);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const user = useSelector((store) => store.auth.user);
+  const {posts} = useSelector((store)=>store.post);
+  const dispatch = useDispatch();
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -42,6 +48,29 @@ const Post = ({post}) => {
     return count.toString();
   };
 
+  const deletePostHandler = async () => {
+    try {
+      const res = await axios.delete(
+        `http://localhost:8000/api/v1/post/delete/${post?._id}`,
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.data.success) {
+        const updatedPostData = posts.filter((postItem)=>postItem?._id !== post?._id)
+        toast.success(res.data.message || res.data.msg);
+        dispatch(setPosts(updatedPostData));
+        // Close the dialog
+        setDialogOpen(false);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+      // Close the dialog
+      setDialogOpen(false);
+    }
+  };
+
   return (
     <div className="my-8 w-full max-w-sm mx-auto bg-white">
       {/* Header */}
@@ -62,7 +91,7 @@ const Post = ({post}) => {
             <span className="text-gray-500 text-xs">{post.timestamp}</span>
           </div>
         </div>
-        <Dialog>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <button
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -76,7 +105,7 @@ const Post = ({post}) => {
               variant="ghost"
               className="cursor-pointer w-full text-[#ED4956] font-bold hover:bg-gray-50"
             >
-              {user.isFollowing ? "Unfollow" : "Follow"}
+              {user?.isFollowing ? "Unfollow" : "Follow"}
             </Button>
             <Button
               variant="ghost"
@@ -100,6 +129,7 @@ const Post = ({post}) => {
               <Button
                 variant="ghost"
                 className="cursor-pointer w-full text-[#ED4956] hover:bg-gray-50"
+                onClick={deletePostHandler}
               >
                 delete
               </Button>
