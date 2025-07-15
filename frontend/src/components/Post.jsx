@@ -6,32 +6,20 @@ import { Button } from "./ui/button";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { MessageCircle, Send } from "lucide-react";
 import Commentdialog from "./Commentdialog";
+import { useSelector } from "react-redux";
+import store from "@/redux/store";
 
-const Post = ({ 
-  user = {
-    username: "username",
-    avatar: "",
-    isFollowing: false
-  },
-  post = {
-    image: "https://images.unsplash.com/photo-1484406566174-9da000fda645?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGFuaW1hbHN8ZW58MHx8MHx8fDA%3D",
-    caption: "Beautiful sunset today! 🌅",
-    likes: 1247,
-    comments: 23,
-    isLiked: false,
-    isBookmarked: false,
-    timestamp: "2h"
-  }
-}) => {
+const Post = ({post}) => {
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
-  const [likesCount, setLikesCount] = useState(post.likes);
+  const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
   const [comment, setComment] = useState("");
-  const [open,setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const user = useSelector((store) => store.auth);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
-    setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+    setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
   };
 
   const handleBookmark = () => {
@@ -47,9 +35,9 @@ const Post = ({
 
   const formatLikes = (count) => {
     if (count >= 1000000) {
-      return (count / 1000000).toFixed(1) + 'M';
+      return (count / 1000000).toFixed(1) + "M";
     } else if (count >= 1000) {
-      return (count / 1000).toFixed(1) + 'k';
+      return (count / 1000).toFixed(1) + "k";
     }
     return count.toString();
   };
@@ -60,20 +48,23 @@ const Post = ({
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar} alt={`${user.username}'s avatar`} />
+            <AvatarImage
+              src={post.author?.profilePicture}
+              alt={`${post.author.username}'s avatar`}
+            />
             <AvatarFallback className="text-xs font-medium">
-              {user.username.slice(0, 2).toUpperCase()}
+              {post.author.username.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex items-center gap-2">
-            <h1 className="text-sm font-semibold">{user.username}</h1>
+            <h1 className="text-sm font-semibold">{post.author.username}</h1>
             <span className="text-gray-500 text-xs">•</span>
             <span className="text-gray-500 text-xs">{post.timestamp}</span>
           </div>
         </div>
         <Dialog>
           <DialogTrigger asChild>
-            <button 
+            <button
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
               aria-label="More options"
             >
@@ -87,18 +78,39 @@ const Post = ({
             >
               {user.isFollowing ? "Unfollow" : "Follow"}
             </Button>
-            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
+            <Button
+              variant="ghost"
+              className="cursor-pointer w-full hover:bg-gray-50"
+            >
               Add to favorites
             </Button>
-            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
+            <Button
+              variant="ghost"
+              className="cursor-pointer w-full hover:bg-gray-50"
+            >
               Copy link
             </Button>
-            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
+            <Button
+              variant="ghost"
+              className="cursor-pointer w-full hover:bg-gray-50"
+            >
               Share to...
             </Button>
-            <Button variant="ghost" className="cursor-pointer w-full text-[#ED4956] hover:bg-gray-50">
-              Report
-            </Button>
+            {user && user?._id === post?.author._id ? (
+              <Button
+                variant="ghost"
+                className="cursor-pointer w-full text-[#ED4956] hover:bg-gray-50"
+              >
+                delete
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                className="cursor-pointer w-full text-[#ED4956] hover:bg-gray-50"
+              >
+                report
+              </Button>
+            )}
           </DialogContent>
         </Dialog>
       </div>
@@ -122,9 +134,9 @@ const Post = ({
             aria-label={isLiked ? "Unlike post" : "Like post"}
           >
             {isLiked ? (
-              <FaHeart 
-                size="24" 
-                className="text-red-500 cursor-pointer animate-pulse" 
+              <FaHeart
+                size="24"
+                className="text-red-500 cursor-pointer animate-pulse"
               />
             ) : (
               <FaRegHeart
@@ -137,7 +149,10 @@ const Post = ({
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             aria-label="Comment on post"
           >
-            <MessageCircle className="cursor-pointer hover:text-gray-600 w-6 h-6" onClick={()=>setOpen(true)} />
+            <MessageCircle
+              className="cursor-pointer hover:text-gray-600 w-6 h-6"
+              onClick={() => setOpen(true)}
+            />
           </button>
           <button
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -152,9 +167,9 @@ const Post = ({
           className="p-1 hover:bg-gray-100 rounded-full transition-colors"
           aria-label={isBookmarked ? "Remove bookmark" : "Bookmark post"}
         >
-          <Bookmark 
+          <Bookmark
             className={`cursor-pointer hover:text-gray-600 w-6 h-6 transition-colors ${
-              isBookmarked ? 'fill-current' : ''
+              isBookmarked ? "fill-current" : ""
             }`}
           />
         </button>
@@ -163,21 +178,24 @@ const Post = ({
       {/* Likes Count */}
       <div className="px-1 mb-2">
         <span className="font-semibold text-sm">
-          {formatLikes(likesCount)} {likesCount === 1 ? 'like' : 'likes'}
+          {formatLikes(likesCount)} {likesCount === 1 ? "like" : "likes"}
         </span>
       </div>
 
       {/* Caption */}
       <div className="px-1 mb-2">
         <p className="text-sm">
-          <span className="font-semibold mr-2">{user.username}</span>
+          <span className="font-semibold mr-2">{post.author.username}</span>
           {post.caption}
         </p>
       </div>
 
       {/* Comments */}
       <div className="px-1 mb-2">
-        <button className="text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer" onClick={()=>setOpen(true)} >
+        <button
+          className="text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+          onClick={() => setOpen(true)}
+        >
           View all {post.comments} comments
         </button>
       </div>
@@ -193,7 +211,7 @@ const Post = ({
           placeholder="Add a comment..."
           className="text-sm flex-1 px-3 py-2 focus:outline-none"
           onKeyPress={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === "Enter") {
               handleComment();
             }
           }}
@@ -203,8 +221,8 @@ const Post = ({
           disabled={!comment.trim()}
           className={`ml-2 text-sm font-semibold px-3 py-2 rounded transition-colors ${
             comment.trim()
-              ? 'text-[#3BADF8] hover:text-[#1d9bf0] cursor-pointer'
-              : 'text-gray-400 cursor-not-allowed'
+              ? "text-[#3BADF8] hover:text-[#1d9bf0] cursor-pointer"
+              : "text-gray-400 cursor-not-allowed"
           }`}
         >
           Post

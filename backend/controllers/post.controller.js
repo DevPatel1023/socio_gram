@@ -51,11 +51,11 @@ export const addNewPost = async(req,res)=>{
 // get all posts
 export const getAllPost = async (req,res) =>{
     try {
-        const posts = await Post.find().sort({createAt:-1}).populate({path : 'author', select : 'username,profilePicture'}).populate({path:'comments',
+        const posts = await Post.find().sort({createAt:-1}).populate({path : 'author', select : 'username profilePicture'}).populate({path:'comments',
             sort : {createAt:-1},
             populate :{
                 path : 'author',
-                select:'username,profilePicture'
+                select:'username profilePicture'
             }
         });
 
