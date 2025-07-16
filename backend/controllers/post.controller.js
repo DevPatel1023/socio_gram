@@ -117,6 +117,7 @@ export const likepost = async (req,res) => {
         //implement socket.io for real time notification
         return res.status(200).json({
             message : 'User Liked' ,
+            post,
             success : true
         })
     } catch (error) {
@@ -147,6 +148,7 @@ export const dislikepost = async (req,res) => {
         //implement socket.io for real time notification
         return res.status(200).json({
             message : 'User DisLiked' ,
+            post,
             success : true
         })
     } catch (error) {
@@ -274,7 +276,7 @@ export const bookmarkPost = async (req,res) => {
         
         if(user.bookmarks.includes(post._id)){
             // post already bookmark so remove it
-            await user.bookmarks.updateOne({$pull : {bookmarks : post._id}});
+            user.bookmarks.pull(post._id); //removes if exists
             await user.save();
             return res.status(200).json({
                 type : 'unsaved',

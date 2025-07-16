@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Bookmark, MoreHorizontal } from "lucide-react";
 import { Button } from "./ui/button";
@@ -7,25 +7,65 @@ import { FaRegHeart, FaHeart } from "react-icons/fa";
 import { MessageCircle, Send } from "lucide-react";
 import Commentdialog from "./Commentdialog";
 import { useDispatch, useSelector } from "react-redux";
-import store from "@/redux/store";
 import { toast } from "sonner";
 import axios from "axios";
 import { setPosts } from "@/redux/postSlice";
 
 const Post = ({ post }) => {
-  const [isLiked, setIsLiked] = useState(post.isLiked);
-  const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
+  const user = useSelector((store) => store.auth.user);
+  const { posts } = useSelector((store) => store.post);
+  const dispatch = useDispatch();
+
+  const [isLiked, setIsLiked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
   const [comment, setComment] = useState("");
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const user = useSelector((store) => store.auth.user);
-  const {posts} = useSelector((store)=>store.post);
-  const dispatch = useDispatch();
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+  useEffect(() => {
+    if (user) {
+      setIsLiked(post.likes.includes(user._id));
+    }
+  }, [user, post.likes]);
+
+  const likeanddislikeHandler = async (postId) => {
+    try {
+      const action = isLiked ? "dislike" : "like";
+      const res = await axios.get(
+        `http://localhost:8000/api/v1/post/${postId}/${action}`,
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.data.success) {
+        const updatedLikes = isLiked ? likesCount - 1 : likesCount + 1;
+        setLikesCount(updatedLikes);
+        setIsLiked(!isLiked);
+
+        // Update the posts array in Redux store
+        const updatedPostData = posts.map((p) =>
+          p._id === post._id
+            ? {
+                ...p,
+                likes: isLiked
+                  ? p.likes.filter((id) => id !== user._id)
+                  : [...p.likes, user._id],
+              }
+            : p
+        );
+        dispatch(setPosts(updatedPostData));
+
+        toast.success(res.data.message || res.data.msg);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to update like status");
+    }
+  };
+
+  const handleLike = (postId) => {
+    likeanddislikeHandler(postId);
   };
 
   const handleBookmark = () => {
@@ -34,7 +74,6 @@ const Post = ({ post }) => {
 
   const handleComment = () => {
     if (comment.trim()) {
-      // Handle comment submission
       setComment("");
     }
   };
@@ -57,16 +96,16 @@ const Post = ({ post }) => {
         }
       );
       if (res.data.success) {
-        const updatedPostData = posts.filter((postItem)=>postItem?._id !== post?._id)
+        const updatedPostData = posts.filter(
+          (postItem) => postItem?._id !== post?._id
+        );
         toast.success(res.data.message || res.data.msg);
         dispatch(setPosts(updatedPostData));
-        // Close the dialog
         setDialogOpen(false);
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message);
-      // Close the dialog
+      toast.error(error.response?.data?.message || "Failed to delete post");
       setDialogOpen(false);
     }
   };
@@ -159,7 +198,7 @@ const Post = ({ post }) => {
       <div className="flex items-center justify-between my-3 px-1">
         <div className="flex items-center gap-4">
           <button
-            onClick={handleLike}
+            onClick={() => handleLike(post._id)}
             className="p-1 hover:bg-gray-100 rounded-full transition-all duration-200"
             aria-label={isLiked ? "Unlike post" : "Like post"}
           >
