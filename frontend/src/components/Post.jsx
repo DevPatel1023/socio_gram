@@ -72,9 +72,20 @@ const Post = ({ post }) => {
     setIsBookmarked(!isBookmarked);
   };
 
-  const handleComment = () => {
-    if (comment.trim()) {
-      setComment("");
+  const handleComment = async () => {
+    try {
+      const res = await axios.post(`http://localhost:8000/api/v1/post/${post._id}/comment`,{comment},{
+        headers : {
+          "Content-Type" : 'application/json'
+        },
+        withCredentials : true
+      });
+      if(res.data.success){
+        const updatedPostData = [...comments]
+        toast.success(res.data.message || res.data.msg);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
