@@ -4,9 +4,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Link } from "react-router-dom";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "./ui/button";
+import { useSelector } from "react-redux";
+import Comment from "./ui/comment";
 
 const Commentdialog = ({ open, setOpen }) => {
   const [text , setText] = useState("");
+  const {selectedPost} = useSelector((store)=>store.post);
 
   const changeEventHandler = (e)=>{
     const inputText = e.target.value;
@@ -30,8 +33,8 @@ const Commentdialog = ({ open, setOpen }) => {
         <div className="flex flex-1">
           <div className="w-1/2">
             <img
-              src="https://images.unsplash.com/photo-1484406566174-9da000fda645?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGFuaW1hbHN8ZW58MHx8MHx8fDA%3D"
-              alt="random img"
+              src={selectedPost?.image}
+              alt="post img"
               className="w-full h-full object-cover rounded-l-lg"
             />
           </div>
@@ -41,12 +44,12 @@ const Commentdialog = ({ open, setOpen }) => {
               <div className="flex gap-3 items-center">
                 <Link>
                   <Avatar>
-                    <AvatarImage src="" />
-                    <AvatarFallback>CN</AvatarFallback>
+                    <AvatarImage src={selectedPost?.author?.profilePicture} />
+                    <AvatarFallback>{selectedPost?.author.username.slice(0,1)}</AvatarFallback>
                   </Avatar>
                 </Link>
                 <div>
-                  <Link className="font-semibold text-sm">username</Link>
+                  <Link className="font-semibold text-sm">{selectedPost?.author?.username}</Link>
                 </div>
               </div>
               <Dialog>
@@ -66,7 +69,7 @@ const Commentdialog = ({ open, setOpen }) => {
             <hr />
             {/* comments */}
             <div className="flex-1 overflow-y-auto max-h-96 p-4 flex-row">
-              cccc
+             {selectedPost?.comments.map((comment)=> <Comment key={comment._id} comment={comment} />)}
             </div>
             <div className="p-4">
               <div className="flex items-center gap-2">

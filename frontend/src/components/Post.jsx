@@ -9,7 +9,7 @@ import Commentdialog from "./Commentdialog";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import axios from "axios";
-import { setPosts } from "@/redux/postSlice";
+import { setPosts,setSelectedPost } from "@/redux/postSlice";
 
 const Post = ({ post }) => {
   const user = useSelector((store) => store.auth.user);
@@ -49,11 +49,17 @@ const Post = ({ post }) => {
         const updatedPost = res.data.post;
         setLikesCount(updatedPost.likes.length);
         setIsLiked(updatedPost.likes.includes(user._id));
-        toast.success(res.data.message || `${action.charAt(0).toUpperCase() + action.slice(1)}d successfully`);
+        toast.success(
+          res.data.message ||
+            `${action.charAt(0).toUpperCase() + action.slice(1)}d successfully`
+        );
       }
     } catch (error) {
       console.error("Like/Dislike error:", error);
-      toast.error(error.response?.data?.message || `Failed to ${isLiked ? "dislike" : "like"} post`);
+      toast.error(
+        error.response?.data?.message ||
+          `Failed to ${isLiked ? "dislike" : "like"} post`
+      );
     }
   };
 
@@ -78,7 +84,10 @@ const Post = ({ post }) => {
       }
     } catch (error) {
       console.error("Bookmark error:", error);
-      toast.error(error.response?.data?.message || `Failed to ${isBookmarked ? "unbookmark" : "bookmark"} post`);
+      toast.error(
+        error.response?.data?.message ||
+          `Failed to ${isBookmarked ? "unbookmark" : "bookmark"} post`
+      );
     }
   };
 
@@ -112,15 +121,10 @@ const Post = ({ post }) => {
       }
     } catch (error) {
       console.error("Comment error:", error);
-      const errorMessage = error.response?.data?.message || "Failed to post comment. Please try again.";
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to post comment. Please try again.";
       toast.error(errorMessage);
-      if (errorMessage.includes("net::ERR_NAME_NOT_RESOLVED")) {
-        toast.error("Cannot connect to the server. Please check if the backend is running on http://localhost:8000.");
-      } else if (error.response?.status === 429) {
-        toast.error("You're commenting too frequently. Please wait and try again.");
-      } else if (error.response?.data?.message?.includes("inappropriate")) {
-        toast.error("Comment contains restricted content. Please revise and try again.");
-      }
     }
   };
 
@@ -162,7 +166,9 @@ const Post = ({ post }) => {
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage
-              src={post.author?.profilePicture || "https://via.placeholder.com/150"}
+              src={
+                post.author?.profilePicture || "https://via.placeholder.com/150"
+              }
               alt={`${post.author?.username || "User"}'s avatar`}
             />
             <AvatarFallback className="text-xs font-medium">
@@ -170,9 +176,13 @@ const Post = ({ post }) => {
             </AvatarFallback>
           </Avatar>
           <div className="flex items-center gap-2">
-            <h1 className="text-sm font-semibold">{post.author?.username || "Unknown"}</h1>
+            <h1 className="text-sm font-semibold">
+              {post.author?.username || "Unknown"}
+            </h1>
             <span className="text-gray-500 text-xs">•</span>
-            <span className="text-gray-500 text-xs">{post.timestamp || "N/A"}</span>
+            <span className="text-gray-500 text-xs">
+              {post.timestamp || "N/A"}
+            </span>
           </div>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -191,13 +201,22 @@ const Post = ({ post }) => {
             >
               {user?.isFollowing ? "Unfollow" : "Follow"}
             </Button>
-            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
+            <Button
+              variant="ghost"
+              className="cursor-pointer w-full hover:bg-gray-50"
+            >
               Add to favorites
             </Button>
-            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
+            <Button
+              variant="ghost"
+              className="cursor-pointer w-full hover:bg-gray-50"
+            >
               Copy link
             </Button>
-            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
+            <Button
+              variant="ghost"
+              className="cursor-pointer w-full hover:bg-gray-50"
+            >
               Share to...
             </Button>
             {user && user?._id === post?.author?._id ? (
@@ -257,7 +276,10 @@ const Post = ({ post }) => {
           >
             <MessageCircle
               className="cursor-pointer hover:text-gray-600 w-6 h-6"
-              onClick={() => setOpen(true)}
+              onClick={() => {
+                dispatch(setSelectedPost(post));
+                setOpen(true);
+              }}
             />
           </button>
           <button
@@ -292,7 +314,9 @@ const Post = ({ post }) => {
       {/* Caption */}
       <div className="px-1 mb-2">
         <p className="text-sm">
-          <span className="font-semibold mr-2">{post.author?.username || "Unknown"}</span>
+          <span className="font-semibold mr-2">
+            {post.author?.username || "Unknown"}
+          </span>
           {post.caption || ""}
         </p>
       </div>
@@ -301,7 +325,10 @@ const Post = ({ post }) => {
       <div className="px-1 mb-2">
         <button
           className="text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            dispatch(setSelectedPost(post));
+            setOpen(true);
+          }}
         >
           View all {comments.length} comments
         </button>
