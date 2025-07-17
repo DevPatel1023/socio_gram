@@ -176,9 +176,11 @@ export const addComment = async (req,res) => {
             text,
             author : commentUserId,
             post : postId
-        }).populate({
+        });
+        await comment.save();
+        const populatedComment = await Comment.findById(comment._id).populate({
             path : 'author',
-            select : 'username , profilePicture'
+            select : 'username profilePicture'
         });
 
         // save comment's id in post -> model relationship and then save the post 
@@ -187,7 +189,7 @@ export const addComment = async (req,res) => {
 
         return res.status(201).json({
             message : 'comment added',
-            comment,
+            comment : populatedComment,
             success : true
         })
     } catch (error) {

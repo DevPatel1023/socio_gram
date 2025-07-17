@@ -17,50 +17,43 @@ const Post = ({ post }) => {
   const dispatch = useDispatch();
 
   const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
-  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState(post.comments || []);
+  const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && post) {
       setIsLiked(post.likes.includes(user._id));
+      setIsBookmarked(user?.bookmarks?.includes(post._id) || false);
+      setLikesCount(post.likes.length);
+      setComments(post.comments || []);
     }
-  }, [user, post.likes]);
+  }, [user, post]);
 
   const likeanddislikeHandler = async (postId) => {
+    if (!user) {
+      toast.error("Please log in to like posts");
+      return;
+    }
     try {
       const action = isLiked ? "dislike" : "like";
-      const res = await axios.get(
+      const res = await axios.post(
         `http://localhost:8000/api/v1/post/${postId}/${action}`,
-        {
-          withCredentials: true,
-        }
+        {},
+        { withCredentials: true }
       );
       if (res.data.success) {
-        const updatedLikes = isLiked ? likesCount - 1 : likesCount + 1;
-        setLikesCount(updatedLikes);
-        setIsLiked(!isLiked);
-
-        // Update the posts array in Redux store
-        const updatedPostData = posts.map((p) =>
-          p._id === post._id
-            ? {
-                ...p,
-                likes: isLiked
-                  ? p.likes.filter((id) => id !== user._id)
-                  : [...p.likes, user._id],
-              }
-            : p
-        );
-        dispatch(setPosts(updatedPostData));
-
-        toast.success(res.data.message || res.data.msg);
+        const updatedPost = res.data.post;
+        setLikesCount(updatedPost.likes.length);
+        setIsLiked(updatedPost.likes.includes(user._id));
+        toast.success(res.data.message || `${action.charAt(0).toUpperCase() + action.slice(1)}d successfully`);
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message || "Failed to update like status");
+      console.error("Like/Dislike error:", error);
+      toast.error(error.response?.data?.message || `Failed to ${isLiked ? "dislike" : "like"} post`);
     }
   };
 
@@ -68,54 +61,95 @@ const Post = ({ post }) => {
     likeanddislikeHandler(postId);
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
+  const handleBookmark = async () => {
+    if (!user) {
+      toast.error("Please log in to bookmark posts");
+      return;
+    }
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/v1/post/${post._id}/bookmark`,
+        {},
+        { withCredentials: true }
+      );
+      if (res.data.success) {
+        setIsBookmarked(res.data.type === "bookmarked");
+        toast.success(res.data.message || `Post ${res.data.type}`);
+      }
+    } catch (error) {
+      console.error("Bookmark error:", error);
+      toast.error(error.response?.data?.message || `Failed to ${isBookmarked ? "unbookmark" : "bookmark"} post`);
+    }
   };
 
   const handleComment = async () => {
+    if (!user) {
+      toast.error("Please log in to comment");
+      return;
+    }
+    if (!text.trim()) {
+      toast.error("Comment cannot be empty");
+      return;
+    }
     try {
-      const res = await axios.post(`http://localhost:8000/api/v1/post/${post._id}/comment`,{comment},{
-        headers : {
-          "Content-Type" : 'application/json'
-        },
-        withCredentials : true
-      });
-      if(res.data.success){
-        const updatedPostData = [...comments]
-        toast.success(res.data.message || res.data.msg);
+      const res = await axios.post(
+        `http://localhost:8000/api/v1/post/${post._id}/comment`,
+        { text },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+      if (res.data.success) {
+        const updatedCommentData = [...comments, res.data.comment];
+        setComments(updatedCommentData);
+        setText("");
+        const updatedPostData = posts.map((p) =>
+          p._id === post._id ? { ...p, comments: updatedCommentData } : p
+        );
+        dispatch(setPosts(updatedPostData));
+        toast.success(res.data.message || "Comment added successfully");
       }
     } catch (error) {
-      console.log(error);
+      console.error("Comment error:", error);
+      const errorMessage = error.response?.data?.message || "Failed to post comment. Please try again.";
+      toast.error(errorMessage);
+      if (errorMessage.includes("net::ERR_NAME_NOT_RESOLVED")) {
+        toast.error("Cannot connect to the server. Please check if the backend is running on http://localhost:8000.");
+      } else if (error.response?.status === 429) {
+        toast.error("You're commenting too frequently. Please wait and try again.");
+      } else if (error.response?.data?.message?.includes("inappropriate")) {
+        toast.error("Comment contains restricted content. Please revise and try again.");
+      }
     }
   };
 
   const formatLikes = (count) => {
-    if (count >= 1000000) {
-      return (count / 1000000).toFixed(1) + "M";
-    } else if (count >= 1000) {
-      return (count / 1000).toFixed(1) + "k";
-    }
+    if (count >= 1000000) return (count / 1000000).toFixed(1) + "M";
+    if (count >= 1000) return (count / 1000).toFixed(1) + "k";
     return count.toString();
   };
 
   const deletePostHandler = async () => {
+    if (!user) {
+      toast.error("Please log in to delete posts");
+      return;
+    }
     try {
       const res = await axios.delete(
         `http://localhost:8000/api/v1/post/delete/${post?._id}`,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       if (res.data.success) {
         const updatedPostData = posts.filter(
           (postItem) => postItem?._id !== post?._id
         );
-        toast.success(res.data.message || res.data.msg);
         dispatch(setPosts(updatedPostData));
+        toast.success(res.data.message || "Post deleted successfully");
         setDialogOpen(false);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Delete post error:", error);
       toast.error(error.response?.data?.message || "Failed to delete post");
       setDialogOpen(false);
     }
@@ -128,17 +162,17 @@ const Post = ({ post }) => {
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage
-              src={post.author?.profilePicture}
-              alt={`${post.author.username}'s avatar`}
+              src={post.author?.profilePicture || "https://via.placeholder.com/150"}
+              alt={`${post.author?.username || "User"}'s avatar`}
             />
             <AvatarFallback className="text-xs font-medium">
-              {post.author.username.slice(0, 2).toUpperCase()}
+              {post.author?.username?.slice(0, 2).toUpperCase() || "US"}
             </AvatarFallback>
           </Avatar>
           <div className="flex items-center gap-2">
-            <h1 className="text-sm font-semibold">{post.author.username}</h1>
+            <h1 className="text-sm font-semibold">{post.author?.username || "Unknown"}</h1>
             <span className="text-gray-500 text-xs">•</span>
-            <span className="text-gray-500 text-xs">{post.timestamp}</span>
+            <span className="text-gray-500 text-xs">{post.timestamp || "N/A"}</span>
           </div>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -157,38 +191,29 @@ const Post = ({ post }) => {
             >
               {user?.isFollowing ? "Unfollow" : "Follow"}
             </Button>
-            <Button
-              variant="ghost"
-              className="cursor-pointer w-full hover:bg-gray-50"
-            >
+            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
               Add to favorites
             </Button>
-            <Button
-              variant="ghost"
-              className="cursor-pointer w-full hover:bg-gray-50"
-            >
+            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
               Copy link
             </Button>
-            <Button
-              variant="ghost"
-              className="cursor-pointer w-full hover:bg-gray-50"
-            >
+            <Button variant="ghost" className="cursor-pointer w-full hover:bg-gray-50">
               Share to...
             </Button>
-            {user && user?._id === post?.author._id ? (
+            {user && user?._id === post?.author?._id ? (
               <Button
                 variant="ghost"
                 className="cursor-pointer w-full text-[#ED4956] hover:bg-gray-50"
                 onClick={deletePostHandler}
               >
-                delete
+                Delete
               </Button>
             ) : (
               <Button
                 variant="ghost"
                 className="cursor-pointer w-full text-[#ED4956] hover:bg-gray-50"
               >
-                report
+                Report
               </Button>
             )}
           </DialogContent>
@@ -199,7 +224,7 @@ const Post = ({ post }) => {
       <div className="relative">
         <img
           className="rounded-sm w-full aspect-square object-cover border border-gray-200"
-          src={post.image}
+          src={post.image || "https://via.placeholder.com/400"}
           alt="Post content"
           loading="lazy"
         />
@@ -212,6 +237,7 @@ const Post = ({ post }) => {
             onClick={() => handleLike(post._id)}
             className="p-1 hover:bg-gray-100 rounded-full transition-all duration-200"
             aria-label={isLiked ? "Unlike post" : "Like post"}
+            disabled={!user}
           >
             {isLiked ? (
               <FaHeart
@@ -246,6 +272,7 @@ const Post = ({ post }) => {
           onClick={handleBookmark}
           className="p-1 hover:bg-gray-100 rounded-full transition-colors"
           aria-label={isBookmarked ? "Remove bookmark" : "Bookmark post"}
+          disabled={!user}
         >
           <Bookmark
             className={`cursor-pointer hover:text-gray-600 w-6 h-6 transition-colors ${
@@ -265,8 +292,8 @@ const Post = ({ post }) => {
       {/* Caption */}
       <div className="px-1 mb-2">
         <p className="text-sm">
-          <span className="font-semibold mr-2">{post.author.username}</span>
-          {post.caption}
+          <span className="font-semibold mr-2">{post.author?.username || "Unknown"}</span>
+          {post.caption || ""}
         </p>
       </div>
 
@@ -276,18 +303,18 @@ const Post = ({ post }) => {
           className="text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
           onClick={() => setOpen(true)}
         >
-          View all {post.comments} comments
+          View all {comments.length} comments
         </button>
       </div>
 
-      <Commentdialog open={open} setOpen={setOpen} />
+      <Commentdialog open={open} setOpen={setOpen} comments={comments} />
 
       {/* Add Comment */}
       <div className="flex items-center border-t pt-3 mt-3">
         <input
           type="text"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
           placeholder="Add a comment..."
           className="text-sm flex-1 px-3 py-2 focus:outline-none"
           onKeyPress={(e) => {
@@ -295,12 +322,13 @@ const Post = ({ post }) => {
               handleComment();
             }
           }}
+          disabled={!user}
         />
         <button
           onClick={handleComment}
-          disabled={!comment.trim()}
+          disabled={!text.trim() || !user}
           className={`ml-2 text-sm font-semibold px-3 py-2 rounded transition-colors ${
-            comment.trim()
+            text.trim() && user
               ? "text-[#3BADF8] hover:text-[#1d9bf0] cursor-pointer"
               : "text-gray-400 cursor-not-allowed"
           }`}
