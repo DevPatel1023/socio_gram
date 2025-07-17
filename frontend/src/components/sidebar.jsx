@@ -16,6 +16,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuthUser } from "@/redux/authSlide";
 import CreatePost from "./CreatePost";
+import { setPosts, setSelectedPost } from "@/redux/postSlice";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -40,6 +41,8 @@ const Sidebar = () => {
       });
       if (res.data.success) {
         dispatch(setAuthUser(null));
+        // dispatch(setPosts([]));
+        dispatch(setSelectedPost(null));
         navigate("/login");
         toast.success(res.data.message);
       }

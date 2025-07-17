@@ -243,7 +243,7 @@ const Post = ({ post }) => {
       <div className="relative">
         <img
           className="rounded-sm w-full aspect-square object-cover border border-gray-200"
-          src={post.image || "https://via.placeholder.com/400"}
+          src={post?.image}
           alt="Post content"
           loading="lazy"
         />
@@ -334,7 +334,7 @@ const Post = ({ post }) => {
         </button>
       </div>
 
-      <Commentdialog open={open} setOpen={setOpen} comments={comments} />
+     <Commentdialog open={open} setOpen={setOpen} comments={comments} />
 
       {/* Add Comment */}
       <div className="flex items-center border-t pt-3 mt-3">
