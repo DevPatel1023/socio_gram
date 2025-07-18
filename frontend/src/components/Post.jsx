@@ -161,7 +161,8 @@ const Post = ({ post }) => {
   };
 
   return (
-    <div className="my-8 w-full max-w-sm mx-auto bg-white">
+    // Changed from mx-auto to just my-8 to prevent shifting
+    <div className="my-8 w-full max-w-sm bg-white">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 px-1">
         <div className="flex items-center gap-3">
