@@ -9,19 +9,20 @@ import Comment from "./Comment";
 import axios from "axios";
 import { toast } from "sonner";
 import { setPosts } from "@/redux/postSlice";
+import timeago from "@/lib/timefun";
 
 const Commentdialog = ({ open, setOpen, comments }) => {
   const [text, setText] = useState("");
-  const { selectedPost , posts } = useSelector((store) => store.post);
+  const { selectedPost, posts } = useSelector((store) => store.post);
   const dispatch = useDispatch();
-  const [comment,setComment] = useState(selectedPost?.comments);
+  const [comment, setComment] = useState(selectedPost?.comments);
 
   const changeEventHandler = (e) => {
     const inputText = e.target.value;
     setText(inputText.trim() ? inputText : "");
   };
 
-     const handleComment = async () => {
+  const handleComment = async () => {
     if (!text.trim()) {
       toast.error("Comment cannot be empty");
       return;
@@ -40,7 +41,9 @@ const Commentdialog = ({ open, setOpen, comments }) => {
         setComment(updatedCommentData);
         setText("");
         const updatedPostData = posts.map((p) =>
-          p._id === selectedPost._id ? { ...p, comments: updatedCommentData } : p
+          p._id === selectedPost._id
+            ? { ...p, comments: updatedCommentData }
+            : p
         );
         dispatch(setPosts(updatedPostData));
         toast.success(res.data.message || "Comment added successfully");
@@ -53,7 +56,6 @@ const Commentdialog = ({ open, setOpen, comments }) => {
       toast.error(errorMessage);
     }
   };
-
 
   return (
     <Dialog open={open}>
@@ -75,11 +77,18 @@ const Commentdialog = ({ open, setOpen, comments }) => {
                 <Link>
                   <Avatar>
                     <AvatarImage src={selectedPost?.author?.profilePicture} />
-                    <AvatarFallback>{selectedPost?.author?.username?.slice(0, 1)}</AvatarFallback>
+                    <AvatarFallback>
+                      {selectedPost?.author?.username?.slice(0, 1)}
+                    </AvatarFallback>
                   </Avatar>
                 </Link>
                 <div>
-                  <Link className="font-semibold text-sm">{selectedPost?.author?.username}</Link>
+                  <Link className="font-semibold text-sm pr-3">
+                    {selectedPost?.author?.username}
+                  </Link>
+                 <span className="text-gray-500 text-xs">
+              {timeago(selectedPost?.timestamp) || "N/A"}
+            </span>
                 </div>
               </div>
               <Dialog>

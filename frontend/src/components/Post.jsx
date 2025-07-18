@@ -9,7 +9,8 @@ import Commentdialog from "./Commentdialog";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import axios from "axios";
-import { setPosts,setSelectedPost } from "@/redux/postSlice";
+import { setPosts, setSelectedPost } from "@/redux/postSlice";
+import { Badge } from "./ui/badge";
 
 const Post = ({ post }) => {
   const user = useSelector((store) => store.auth.user);
@@ -180,9 +181,7 @@ const Post = ({ post }) => {
               {post.author?.username || "Unknown"}
             </h1>
             <span className="text-gray-500 text-xs">•</span>
-            <span className="text-gray-500 text-xs">
-              {post.timestamp || "N/A"}
-            </span>
+            {user?._id === post.author?._id &&(<Badge variant='secondary'>Author</Badge>)}
           </div>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -322,19 +321,21 @@ const Post = ({ post }) => {
       </div>
 
       {/* Comments */}
-      <div className="px-1 mb-2">
-        <button
-          className="text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
-          onClick={() => {
-            dispatch(setSelectedPost(post));
-            setOpen(true);
-          }}
-        >
-          View all {comments.length} comments
-        </button>
-      </div>
+      {comments.length > 0 && (
+        <div className="px-1 mb-2">
+          <button
+            className="text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+            onClick={() => {
+              dispatch(setSelectedPost(post));
+              setOpen(true);
+            }}
+          >
+            View all {comments.length} comments
+          </button>
+        </div>
+      )}
 
-     <Commentdialog open={open} setOpen={setOpen} comments={comments} />
+      <Commentdialog open={open} setOpen={setOpen} comments={comments} />
 
       {/* Add Comment */}
       <div className="flex items-center border-t pt-3 mt-3">
