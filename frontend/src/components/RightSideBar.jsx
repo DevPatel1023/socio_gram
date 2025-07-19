@@ -2,6 +2,7 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import SuggestedUser from "./SuggestedUser";
 
 const RightSideBar = () => {
   const { user } = useSelector((store) => store.auth);
@@ -28,7 +29,8 @@ const RightSideBar = () => {
         {/* Additional sidebar content can go here */}
         <div className="mt-8">
           <h3 className="text-sm font-semibold text-gray-500 mb-4">Suggestions for you</h3>
-          {/* Add suggested users, etc. */}
+          {/*  suggested users, */}
+          <SuggestedUser />
         </div>
       </div>
     </div>
