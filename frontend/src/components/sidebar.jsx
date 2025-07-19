@@ -100,7 +100,7 @@ const Sidebar = () => {
         </Avatar>
       ),
       text: user?.username || "Profile",
-      link: "/profile",
+      link: `/profile/${user._id}`,
       type: "link"
     },
   ];
