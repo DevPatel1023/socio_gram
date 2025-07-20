@@ -89,7 +89,7 @@ const Sidebar = () => {
       icon: <PlusSquare size={24} />,
       text: "Create",
       onClick: createPostHandler,
-      type: "button" // This is a button, not a link
+      type: "button" 
     },
     {
       icon: (

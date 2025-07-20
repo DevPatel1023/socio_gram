@@ -23,6 +23,13 @@ const Profile = () => {
             <AvatarFallback>{user?.username.slice(0, 1)}</AvatarFallback>
           </Avatar>
         </section>
+        <section>
+          <div className="flex flex-col gap-5">
+            <span>
+              { user?.username }
+            </span>
+          </div>
+        </section>
       </div>
     </div>
   );
