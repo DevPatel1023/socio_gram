@@ -1,11 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import useFollowUser from "@/hooks/useFollowUser";
 
 const SuggestedUser = () => {
   const { suggestedUsers = [] } = useSelector((store) => store.auth);
-
+  
+  const intialFollowStatus = {};
+  suggestedUsers.forEach(user => {
+    intialFollowStatus[user._id] = user.isFollowing
+  });
+  const { toggleFollow , isFollowed } = useFollowUser(intialFollowStatus);
+  
   return (
     <div className="mt-6">
       <div className="flex items-center justify-between mb-4">
@@ -42,8 +49,8 @@ const SuggestedUser = () => {
               </div>
             </div>
             
-            <button className="text-xs font-semibold text-blue-500 hover:text-blue-700">
-              Follow
+            <button className="text-xs font-semibold text-blue-500 hover:text-blue-700 cursor-pointer" onClick={() => toggleFollow(user._id)}>
+              { isFollowed(user._id) ? "unfollow" : "follow" }
             </button>
           </div>
         ))}

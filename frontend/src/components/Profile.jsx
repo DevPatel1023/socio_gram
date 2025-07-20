@@ -13,7 +13,10 @@ const Profile = () => {
 
   return (
     <div className="flex max-w-4xl justify-center mx-auto pl-10">
-      <div>
+      <div className="flex flex-col gap-20 p-8">
+
+      </div>
+      <div className='grid grid-cols-2 '>
         <section className="flex items-center justify-center">
           <Avatar className='h-32 w-32'>
             <AvatarImage src={user?.profilePicture} alt="profile image" />

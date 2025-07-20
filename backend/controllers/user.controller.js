@@ -169,17 +169,28 @@ export const editProfile = async (req, res) => {
 
 export const getSuggestedUsers = async (req, res) => {
     try {
-        const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select("-password");
-        if (!suggestedUsers) {
-            return res.status(400).json({
-                message: 'Currently do not have any users',
-                success: false
-            })
-        };
+        const currentUserId = req.id;
 
-        return res.status(200).json({
-            success: true,
-            users: suggestedUsers
+        const currentUser = await User.findById(currentUserId);
+
+        const allUsers = await User.find({
+            _id : { $ne : currentUserId }
+        }).select("-password");
+
+        const suggestedUsers = allUsers.map(user => {
+            const isFollowing = currentUser.following.includes(user._id);
+            return {
+                _id : user._id,
+                username : user.username,
+                profilePicture : user.profilePicture,
+                bio : user.bio,
+                isFollowing
+            }
+        });
+
+        res.status(200).json({
+            success : true,
+            users : suggestedUsers
         })
     } catch (error) {
         console.log(error);

@@ -2,11 +2,28 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SuggestedUser from "./SuggestedUser";
+import { toast } from "sonner";
+import axios from "axios";
 
 const RightSideBar = () => {
   const { user } = useSelector((store) => store.auth);
+  const navigate = useNavigate();
+  const logoutRedirectHandler = async() => {
+    try {
+      const res = await axios.get('http://localhost:8000/api/v1/user/logout',{
+      withCredentials : true
+    });
+    if(res.data.success){
+      // navigate user to login
+      navigate("/login");
+      toast.success(res.data.message);
+    }
+    } catch (error) {
+      toast.error(error?.response?.data?.message||'logout error');
+    }
+  }
 
   return (
     <div className="hidden lg:block w-80 fixed right-0 top-0 h-screen bg-white border-l border-gray-200">
@@ -34,7 +51,7 @@ const RightSideBar = () => {
             </div>
           </div>
           
-          <button className="text-xs font-semibold text-blue-500 hover:text-blue-700">
+          <button className="text-xs font-semibold text-blue-500 hover:text-blue-700" onClick={logoutRedirectHandler}>
             Switch
           </button>
         </div>

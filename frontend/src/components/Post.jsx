@@ -169,7 +169,7 @@ const Post = ({ post }) => {
           <Avatar className="h-8 w-8">
             <AvatarImage
               src={
-                post.author?.profilePicture || "https://via.placeholder.com/150"
+                post.author?.profilePicture
               }
               alt={`${post.author?.username || "User"}'s avatar`}
             />

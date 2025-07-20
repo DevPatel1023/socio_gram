@@ -44,6 +44,7 @@ const Sidebar = () => {
         // dispatch(setPosts([]));
         dispatch(setSelectedPost(null));
         navigate("/login");
+        localStorage.removeItem("followedUser");
         toast.success(res.data.message);
       }
     } catch (error) {
