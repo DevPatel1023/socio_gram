@@ -1,18 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import useFollowUser from "@/hooks/useFollowUser";
+import useFollowUser from "../hooks/useFollowUser";
 
 const SuggestedUser = () => {
   const { suggestedUsers = [] } = useSelector((store) => store.auth);
-  
-  const intialFollowStatus = {};
-  suggestedUsers.forEach(user => {
-    intialFollowStatus[user._id] = user.isFollowing
-  });
-  const { toggleFollow , isFollowed } = useFollowUser(intialFollowStatus);
-  
+  const { toggleFollow, isFollowed } = useFollowUser();
+
   return (
     <div className="mt-6">
       <div className="flex items-center justify-between mb-4">
@@ -28,18 +23,14 @@ const SuggestedUser = () => {
             <div className="flex items-center space-x-3">
               <Link to={`/profile/${user._id}`}>
                 <Avatar className="w-8 h-8">
-                  <AvatarImage 
-                    src={user?.profilePicture} 
-                    alt={user?.username}
-                  />
+                  <AvatarImage src={user?.profilePicture} alt={user?.username} />
                   <AvatarFallback className="text-xs font-medium bg-gray-200 text-gray-700">
                     {user?.username?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </Link>
-              
               <div className="flex flex-col">
-                <Link 
+                <Link
                   to={`/profile/${user._id}`}
                   className="text-sm font-semibold text-gray-900 hover:text-gray-600"
                 >
@@ -48,9 +39,11 @@ const SuggestedUser = () => {
                 <span className="text-xs text-gray-500">Suggested for you</span>
               </div>
             </div>
-            
-            <button className="text-xs font-semibold text-blue-500 hover:text-blue-700 cursor-pointer" onClick={() => toggleFollow(user._id)}>
-              { isFollowed(user._id) ? "unfollow" : "follow" }
+            <button
+              className="text-xs font-semibold text-blue-500 hover:text-blue-700 cursor-pointer"
+              onClick={() => toggleFollow(user._id)}
+            >
+              {isFollowed(user._id) ? "Unfollow" : "Follow"}
             </button>
           </div>
         ))}

@@ -1,37 +1,37 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
+import { toggleFollowState } from "../redux/authSlide.js";
 
-const useFollowUser = (initialFollowStatus = {}) => {
-    const [followedUser, setFollowedUser] = useState(() => {
-        const stored = localStorage.getItem("followedUser");
-        return stored ? JSON.parse(stored) : initialFollowStatus;
-    }); 
+const useFollowUser = () => {
+  const dispatch = useDispatch();
+  const { suggestedUsers } = useSelector((store) => store.auth);
 
-    useEffect(() => { 
-        localStorage.setItem("followedUser",JSON.stringify(followedUser));
-    },[followedUser]);
-    const toggleFollow = async (userId) => {
-        try {
-            const res = await axios.post(`http://localhost:8000/api/v1/user/followorunfollow/${userId}`, {}, {
-                withCredentials: true
-            });
+  // Toggle follow status via API and update redux state
+  const toggleFollow = async (userId) => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/v1/user/followorunfollow/${userId}`,
+        {},
+        { withCredentials: true }
+      );
 
-            if (res.data.success) {
-                // toggle the follow user
-                setFollowedUser((prev) => ({
-                    ...prev,
-                    [userId]: !prev[userId],
-                }))
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            toast.error(error.response.data.message || 'follow successful');
-        }
-    };
-    const isFollowed = (userId) => !!followedUser[userId];
+      if (res.data.success) {
+        dispatch(toggleFollowState(userId)); // Update redux state
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Follow failed");
+    }
+  };
 
-    return { toggleFollow, isFollowed };
-}
+  // Read follow state from redux
+  const isFollowed = (userId) => {
+    const user = suggestedUsers.find((u) => u._id === userId);
+    return user?.isFollowing || false;
+  };
+
+  return { toggleFollow, isFollowed };
+};
 
 export default useFollowUser;
