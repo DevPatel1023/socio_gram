@@ -1,36 +1,68 @@
-import React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import useGetUserProfile from "@/hooks/useGetUserProfile";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const Profile = () => {
-  const params = useParams();
-  const currentUserId = params.id;
-  useGetUserProfile(currentUserId);
-
+  const { id } = useParams(); // Get ID from URL
   const { user } = useSelector((store) => store.auth);
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(`http://localhost:8000/api/v1/user/${id}`, {
+          withCredentials: true,
+        });
+        if (res.data.success) {
+          setProfileData(res.data.user);
+        } else {
+          setError("User not found");
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [id]);
+
+  // Redirect to login if user is not authenticated
+  if (!user || !user._id) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Handle invalid ID or API error
+  if (error) {
+    return (
+      <div className="text-red-600 text-center mt-10">
+        {error}. Please check the URL and try again.
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (loading) {
+    return <div className="text-center mt-10">Loading profile...</div>;
+  }
+
+  // Render profile data
   return (
-    <div className="flex max-w-4xl justify-center mx-auto pl-10">
-      <div className="flex flex-col gap-20 p-8">
-
-      </div>
-      <div className='grid grid-cols-2 '>
-        <section className="flex items-center justify-center">
-          <Avatar className='h-32 w-32'>
-            <AvatarImage src={user?.profilePicture} alt="profile image" />
-            <AvatarFallback>{user?.username.slice(0, 1)}</AvatarFallback>
-          </Avatar>
-        </section>
-        <section>
-          <div className="flex flex-col gap-5">
-            <span>
-              { user?.username }
-            </span>
-          </div>
-        </section>
-      </div>
+    <div className="max-w-2xl mx-auto mt-10">
+      <h1 className="text-2xl font-bold">{profileData?.username}'s Profile</h1>
+      <img
+        src={profileData?.profilePicture}
+        alt="profile"
+        className="w-24 h-24 rounded-full"
+      />
+      <p>{profileData?.bio}</p>
+      <p>Followers: {profileData?.follower?.length || 0}</p>
+      <p>Following: {profileData?.following?.length || 0}</p>
+      <p>Posts: {profileData?.posts?.length || 0}</p>
     </div>
   );
 };
