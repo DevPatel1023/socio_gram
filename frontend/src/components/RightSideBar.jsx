@@ -26,7 +26,7 @@ const RightSideBar = () => {
   }
 
   return (
-    <div className="hidden lg:block w-80 fixed right-0 top-0 h-screen bg-white border-l border-gray-200">
+    <div className="hidden lg:block w-80 fixed right-1 top-0 h-screen bg-white border-l border-gray-200">
       <div className="p-8 pt-6">
         {/* Current User */}
         <div className="flex items-center justify-between py-4">

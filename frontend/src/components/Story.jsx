@@ -151,7 +151,7 @@ const Stories = ({
   return (
     <>
       {/* Stories Container */}
-      <div className="w-full max-w-sm mx-auto bg-white border-b border-gray-200 py-4">
+      <div className="w-full max-w-sm md:max-w-lg mx-auto bg-white border-b border-gray-200 py-4">
         <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4">
           {stories.map((story) => (
             <div

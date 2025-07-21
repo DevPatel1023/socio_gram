@@ -162,9 +162,9 @@ const Post = ({ post }) => {
 
   return (
     // Changed from mx-auto to just my-8 to prevent shifting
-    <div className="my-8 w-full max-w-sm bg-white">
+    <div className="my-8 w-full max-w-sm md:max-w-lg bg-white border border-gray-200 rounded-sm">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 px-1">
+      <div className="flex items-center justify-between mb-3 px-1 mt-2 mx-1">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage

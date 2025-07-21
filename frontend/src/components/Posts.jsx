@@ -24,7 +24,7 @@ const Posts = () => {
   }
   
   return (
-    <div className="w-full space-y-4">
+    <div className=" w-full space-y-4">
       {posts.map((post) => (
         <div key={post._id} className="flex justify-center">
           <Post post={post} />

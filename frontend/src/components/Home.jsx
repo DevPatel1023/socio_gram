@@ -9,12 +9,16 @@ const Home = () => {
   useGetAllPost();
   useSuggestedUsers();
   return (
-    <div className="flex">
-      <div className="flex-grow">
+    <div className="flex w-full mx-auto max-w-7xl">
+
+        <div className="flex-1 min-w-0 px-4">
         <Feed />
         <Outlet />
-      </div>
+        </div>
+
+      <div className="hidden xl:block w-72 shrink-0 pl-4">
       <RightSideBar />
+      </div>
     </div>
   );
 };
