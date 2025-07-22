@@ -287,10 +287,10 @@ export const bookmarkPost = async (req,res) => {
             });
         }else{
             // bookmark the post
-             await user.bookmarks.updateOne({$addToSet : {bookmarks : post._id}});
+             user.bookmarks.push(post._id);
             await user.save();
             return res.status(200).json({
-                type : 'unsaved',
+                type : 'saved',
                 msg : "post saved to bookmark",
                 success : true
             });

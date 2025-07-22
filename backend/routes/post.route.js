@@ -8,11 +8,11 @@ const router = express.Router();
 router.route('/addpost').post(isAuthenticated,upload.single('image'),addNewPost);
 router.route('/all').get(isAuthenticated,getAllPost);
 router.route('/userpost/all').get(isAuthenticated,getUserPosts);
-router.route('/:id/like').get(isAuthenticated,likepost);
-router.route('/:id/dislike').get(isAuthenticated,dislikepost);
+router.route('/:id/like').post(isAuthenticated,likepost);
+router.route('/:id/dislike').post(isAuthenticated,dislikepost);
 router.route('/:id/comment').post(isAuthenticated,addComment);
 router.route('/:id/comment/all').get(isAuthenticated,getCommentOfPost);
 router.route('/delete/:id').delete(isAuthenticated,deletePost);
-router.route(':id/bookmark').post(isAuthenticated,bookmarkPost);
+router.route('/:id/bookmark').post(isAuthenticated,bookmarkPost);
 
 export default router;

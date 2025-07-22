@@ -1,9 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { Bookmark, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { Button } from "./ui/button";
-import { FaRegHeart, FaHeart } from "react-icons/fa";
+import { FaRegHeart, FaHeart, FaBookmark, FaRegBookmark } from "react-icons/fa";
 import { MessageCircle, Send } from "lucide-react";
 import Commentdialog from "./Commentdialog";
 import { useDispatch, useSelector } from "react-redux";
@@ -81,7 +81,7 @@ const Post = ({ post }) => {
         { withCredentials: true }
       );
       if (res.data.success) {
-        setIsBookmarked(res.data.type === "bookmarked");
+        setIsBookmarked(res.data.type === "saved");
         toast.success(res.data.message || `Post ${res.data.type}`);
       }
     } catch (error) {
@@ -175,7 +175,7 @@ const Post = ({ post }) => {
               alt={`${post.author?.username || "User"}'s avatar`}
             />
             <AvatarFallback className="text-xs font-medium">
-              {post.author?.username?.slice(0, 2).toUpperCase() || "US"}
+              <img src="/defaultimg.jpg" alt="default avatar" />
             </AvatarFallback>
           </Avatar>
           <div className="flex items-center gap-2">
@@ -262,7 +262,7 @@ const Post = ({ post }) => {
             {isLiked ? (
               <FaHeart
                 size="24"
-                className="text-red-500 cursor-pointer animate-pulse"
+                className="text-red-500 cursor-pointer "
               />
             ) : (
               <FaRegHeart
@@ -297,11 +297,8 @@ const Post = ({ post }) => {
           aria-label={isBookmarked ? "Remove bookmark" : "Bookmark post"}
           disabled={!user}
         >
-          <Bookmark
-            className={`cursor-pointer hover:text-gray-600 w-6 h-6 transition-colors ${
-              isBookmarked ? "fill-current" : ""
-            }`}
-          />
+          {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
+
         </button>
       </div>
 

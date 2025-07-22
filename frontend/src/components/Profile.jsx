@@ -72,7 +72,7 @@ const Profile = () => {
                 alt="profile image"
               />
               <AvatarFallback>
-                {userProfile?.username.slice(0, 1)}
+                <img src="/defaultimg.jpg" alt="default avatar" />
               </AvatarFallback>
             </Avatar>
           </section>
@@ -109,20 +109,20 @@ const Profile = () => {
                   <Button
                     variant={ isFollowing ? "outline" : "default"}
                     onClick = {()=> toggleFollow(id)}
-                    className={`${ isFollowing ? "text-red-500 hover:text-red-600 hover:border-red-500" : "text-white bg-blue-500 hover:bg-blue-600 hover:text-white"}`}
+                    className={`${ isFollowing ? "text-red-500 hover:text-red-600 hover:border-red-500 cursor-pointer" : "text-white bg-blue-500 hover:bg-blue-600 hover:text-white cursor-pointer"}`}
                   >
                     {isFollowing ? "unfollow" : "follow"}
                   </Button>
                   <Button
                     variant="secondary"
-                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
+                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white cursor-pointer"
                   >
                     Message
                   </Button>
                   <Button
                     variant="secondary"
                     size="icon"
-                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
+                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white cursor-pointer"
                   >
                     <UserPlus />
                   </Button>
