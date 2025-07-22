@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { setPosts, setSelectedPost } from "@/redux/postSlice";
 import { Badge } from "./ui/badge";
+import { Link } from "react-router-dom";
 
 const Post = ({ post }) => {
   const user = useSelector((store) => store.auth.user);
@@ -178,9 +179,9 @@ const Post = ({ post }) => {
             </AvatarFallback>
           </Avatar>
           <div className="flex items-center gap-2">
-            <h1 className="text-sm font-semibold">
+           <Link className="cursor-pointer" to={`/profile/${post.author?._id}`}><h1 className="text-sm font-semibold">
               {post.author?.username || "Unknown"}
-            </h1>
+            </h1></Link>
             <span className="text-gray-500 text-xs">•</span>
             {user?._id === post.author?._id &&(<Badge variant='secondary'>Author</Badge>)}
           </div>

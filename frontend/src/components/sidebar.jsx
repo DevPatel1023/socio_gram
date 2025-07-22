@@ -26,8 +26,6 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
 
-  console.log("Sidebar user state:", user); // Debug user state
-
   const createPostHandler = (e) => {
     e.preventDefault();
     setOpen(true);

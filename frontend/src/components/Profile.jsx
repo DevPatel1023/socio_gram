@@ -4,6 +4,9 @@ import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import useGetUserProfile from "../hooks/useGetUserProfile";
 import useFollowUser from "../hooks/useFollowUser";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Button } from "./ui/button";
+import { Settings, UserPlus } from "lucide-react";
 
 const Profile = () => {
   const { id } = useParams();
@@ -12,6 +15,8 @@ const Profile = () => {
   const [status, setStatus] = useState({ loading: true, error: null });
 
   useGetUserProfile(id);
+  const isUserOwner = user?._id === id;
+  const isFollowing = isFollowed(id);
 
   useEffect(() => {
     if (!id || id === "undefined" || id === "null") {
@@ -57,45 +62,76 @@ const Profile = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-      <div className="flex items-center mb-6">
-        <img
-          src={userProfile.profilePicture || "/default-avatar.png"}
-          alt="Profile"
-          className="w-24 h-24 rounded-full border-4 border-purple-200"
-          onError={(e) => (e.target.src = "/default-avatar.png")}
-        />
-        <div className="ml-4">
-          <h1 className="text-2xl font-bold text-gray-900">{userProfile.username}</h1>
-          <p className="text-gray-600">{userProfile.bio || "No bio available."}</p>
+    <div className="flex justify-center max-w-5xl mx-auto mt-10 p-6">
+      <div className="flex flex-col gap-20 mb-6 ">
+        <div className="grid grid-cols-2">
+          <section>
+            <Avatar className="w-32 h-32">
+              <AvatarImage
+                src={userProfile?.profilePicture}
+                alt="profile image"
+              />
+              <AvatarFallback>
+                {userProfile?.username.slice(0, 1)}
+              </AvatarFallback>
+            </Avatar>
+          </section>
+          <section>
+            <div className="flex items-center justify-center md:flex-row flex-col gap-2">
+              <h1 className="text-xl">{userProfile?.username}</h1>
+
+              {/* buttons */}
+
+              {isUserOwner ? (
+                <div className="flex md:flex-row flex-col gap-2">
+                  <Button
+                    variant="secondary"
+                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white cursor-pointer"
+                  >
+                    Edit profile
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white cursor-pointer"
+                  >
+                    view archives
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white cursor-pointer"
+                  >
+                    <Settings />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex md:flex-row flex-col gap-2">
+                  <Button
+                    variant={ isFollowing ? "outline" : "default"}
+                    onClick = {()=> toggleFollow(id)}
+                    className={`${ isFollowing ? "text-red-500 hover:text-red-600 hover:border-red-500" : "text-white bg-blue-500 hover:bg-blue-600 hover:text-white"}`}
+                  >
+                    {isFollowing ? "unfollow" : "follow"}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
+                  >
+                    Message
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
+                  >
+                    <UserPlus />
+                  </Button>
+                </div>
+              )}
+            </div>
+          </section>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-4 text-center mb-6">
-        <div>
-          <p className="text-xl font-bold text-purple-600">{userProfile.posts.length}</p>
-          <p className="text-gray-600">Posts</p>
-        </div>
-        <div>
-          <p className="text-xl font-bold text-purple-600">{userProfile.follower.length}</p>
-          <p className="text-gray-600">Followers</p>
-        </div>
-        <div>
-          <p className="text-xl font-bold text-purple-600">{userProfile.following.length}</p>
-          <p className="text-gray-600">Following</p>
-        </div>
-      </div>
-      {user._id !== id && (
-        <div className="text-center">
-          <button
-            onClick={() => toggleFollow(id)}
-            className={`px-6 py-2 rounded-full font-medium transition-colors ${
-              isFollowed(id) ? "bg-gray-300 text-gray-800" : "bg-purple-600 text-white"
-            }`}
-          >
-            {isFollowed(id) ? "Unfollow" : "Follow"}
-          </button>
-        </div>
-      )}
     </div>
   );
 };
