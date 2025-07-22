@@ -84,7 +84,7 @@ const Sidebar = () => {
         </Avatar>
       ),
       text: user?.username || "Profile",
-      link: `/profile/${user._id}`,
+      link: `/profile/${user._id}`, // Fixed: Correct route to match /profile/:id
       type: "link",
     },
   ];
@@ -188,7 +188,7 @@ const Sidebar = () => {
             }
           })}
           <Link
-            to={`/profile/${user._id}`}
+            to={`/profile/${user._id}`} // Fixed: Correct route to match /profile/:id
             className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 ${
               isActiveLink(`/profile/${user._id}`)
                 ? "text-purple-600"

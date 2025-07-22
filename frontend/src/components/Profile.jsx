@@ -1,68 +1,101 @@
+// src/components/Profile.jsx
 import { useParams, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import useGetUserProfile from "../hooks/useGetUserProfile";
+import useFollowUser from "../hooks/useFollowUser";
 
 const Profile = () => {
-  const { id } = useParams(); // Get ID from URL
-  const { user } = useSelector((store) => store.auth);
-  const [profileData, setProfileData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { id } = useParams();
+  const { user, userProfile } = useSelector((store) => store.auth);
+  const { toggleFollow, isFollowed } = useFollowUser();
+  const [status, setStatus] = useState({ loading: true, error: null });
+
+  useGetUserProfile(id);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`http://localhost:8000/api/v1/user/${id}`, {
-          withCredentials: true,
-        });
-        if (res.data.success) {
-          setProfileData(res.data.user);
-        } else {
-          setError("User not found");
-        }
-      } catch (err) {
-        setError(err.response?.data?.message || "Failed to load profile");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, [id]);
+    if (!id || id === "undefined" || id === "null") {
+      setStatus({ loading: false, error: "Invalid user ID." });
+      return;
+    }
+    if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+      setStatus({ loading: false, error: "Invalid ID format." });
+      return;
+    }
+    if (userProfile === undefined) {
+      // still fetching
+      return;
+    }
+    if (userProfile === null) {
+      setStatus({ loading: false, error: "User not found." });
+    } else if (userProfile._id === id) {
+      setStatus({ loading: false, error: null });
+    } else {
+      setStatus({ loading: false, error: "User not found." });
+    }
+  }, [id, userProfile]);
 
-  // Redirect to login if user is not authenticated
   if (!user || !user._id) {
     return <Navigate to="/login" replace />;
   }
 
-  // Handle invalid ID or API error
-  if (error) {
+  if (status.error) {
     return (
-      <div className="text-red-600 text-center mt-10">
-        {error}. Please check the URL and try again.
+      <div className="max-w-2xl mx-auto mt-10 p-6 text-center">
+        <p className="text-red-600 font-semibold">{status.error}</p>
       </div>
     );
   }
 
-  // Show loading state
-  if (loading) {
-    return <div className="text-center mt-10">Loading profile...</div>;
+  if (status.loading) {
+    return (
+      <div className="text-center mt-10">
+        <div className="animate-spin h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading profile…</p>
+      </div>
+    );
   }
 
-  // Render profile data
   return (
-    <div className="max-w-2xl mx-auto mt-10">
-      <h1 className="text-2xl font-bold">{profileData?.username}'s Profile</h1>
-      <img
-        src={profileData?.profilePicture}
-        alt="profile"
-        className="w-24 h-24 rounded-full"
-      />
-      <p>{profileData?.bio}</p>
-      <p>Followers: {profileData?.follower?.length || 0}</p>
-      <p>Following: {profileData?.following?.length || 0}</p>
-      <p>Posts: {profileData?.posts?.length || 0}</p>
+    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+      <div className="flex items-center mb-6">
+        <img
+          src={userProfile.profilePicture || "/default-avatar.png"}
+          alt="Profile"
+          className="w-24 h-24 rounded-full border-4 border-purple-200"
+          onError={(e) => (e.target.src = "/default-avatar.png")}
+        />
+        <div className="ml-4">
+          <h1 className="text-2xl font-bold text-gray-900">{userProfile.username}</h1>
+          <p className="text-gray-600">{userProfile.bio || "No bio available."}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-4 text-center mb-6">
+        <div>
+          <p className="text-xl font-bold text-purple-600">{userProfile.posts.length}</p>
+          <p className="text-gray-600">Posts</p>
+        </div>
+        <div>
+          <p className="text-xl font-bold text-purple-600">{userProfile.follower.length}</p>
+          <p className="text-gray-600">Followers</p>
+        </div>
+        <div>
+          <p className="text-xl font-bold text-purple-600">{userProfile.following.length}</p>
+          <p className="text-gray-600">Following</p>
+        </div>
+      </div>
+      {user._id !== id && (
+        <div className="text-center">
+          <button
+            onClick={() => toggleFollow(id)}
+            className={`px-6 py-2 rounded-full font-medium transition-colors ${
+              isFollowed(id) ? "bg-gray-300 text-gray-800" : "bg-purple-600 text-white"
+            }`}
+          >
+            {isFollowed(id) ? "Unfollow" : "Follow"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
