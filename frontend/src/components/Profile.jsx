@@ -6,17 +6,26 @@ import useGetUserProfile from "../hooks/useGetUserProfile";
 import useFollowUser from "../hooks/useFollowUser";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { Settings, UserPlus } from "lucide-react";
+import { AtSign, Settings, UserPlus } from "lucide-react";
+import { FiMoreHorizontal } from "react-icons/fi";
+import { Badge } from "./ui/badge";
+import ProfileIconBar from "./ProfileIconBar";
 
 const Profile = () => {
   const { id } = useParams();
   const { user, userProfile } = useSelector((store) => store.auth);
   const { toggleFollow, isFollowed } = useFollowUser();
   const [status, setStatus] = useState({ loading: true, error: null });
+  const [activeTab,setActiveTab] = useState("posts")
 
   useGetUserProfile(id);
   const isUserOwner = user?._id === id;
   const isFollowing = isFollowed(id);
+
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  }
 
   useEffect(() => {
     if (!id || id === "undefined" || id === "null") {
@@ -76,61 +85,109 @@ const Profile = () => {
               </AvatarFallback>
             </Avatar>
           </section>
-          <section>
-            <div className="flex items-center justify-center md:flex-row flex-col gap-2">
-              <h1 className="text-xl">{userProfile?.username}</h1>
-
-              {/* buttons */}
+          <section className="flex flex-col justify-center gap-4">
+            {/* Username + Buttons */}
+            <div className="flex items-center flex-wrap gap-4">
+              <h1 className="text-2xl font-semibold">
+                {userProfile?.username}
+              </h1>
 
               {isUserOwner ? (
-                <div className="flex md:flex-row flex-col gap-2">
+                <div className="flex flex-row flex-wrap gap-2">
                   <Button
                     variant="secondary"
-                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white cursor-pointer"
+                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
                   >
                     Edit profile
                   </Button>
                   <Button
                     variant="secondary"
-                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white cursor-pointer"
+                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
                   >
-                    view archives
+                    View archives
                   </Button>
                   <Button
                     variant="secondary"
                     size="icon"
-                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white cursor-pointer"
+                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
                   >
                     <Settings />
                   </Button>
                 </div>
               ) : (
-                <div className="flex md:flex-row flex-col gap-2">
+                <div className="flex flex-row flex-wrap gap-2">
                   <Button
-                    variant={ isFollowing ? "outline" : "default"}
-                    onClick = {()=> toggleFollow(id)}
-                    className={`${ isFollowing ? "text-red-500 hover:text-red-600 hover:border-red-500 cursor-pointer" : "text-white bg-blue-500 hover:bg-blue-600 hover:text-white cursor-pointer"}`}
+                    variant={isFollowing ? "outline" : "default"}
+                    onClick={() => toggleFollow(id)}
+                    className={`${
+                      isFollowing
+                        ? "text-red-500 hover:bg-red-500 hover:text-white"
+                        : "text-white bg-blue-500 hover:bg-blue-600"
+                    } h-8`}
                   >
-                    {isFollowing ? "unfollow" : "follow"}
+                    {isFollowing ? "Unfollow" : "Follow"}
                   </Button>
-                  <Button
-                    variant="secondary"
-                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white cursor-pointer"
-                  >
-                    Message
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white cursor-pointer"
-                  >
-                    <UserPlus />
+                  {isFollowing && (
+                    <section className="flex gap-2">
+                      <Button
+                        variant="secondary"
+                        className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
+                      >
+                        Message
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
+                      >
+                        <UserPlus />
+                      </Button>
+                    </section>
+                  )}
+                  <Button variant="secondary" size="icon" className="h-8">
+                    <FiMoreHorizontal />
                   </Button>
                 </div>
               )}
             </div>
+
+            {/* Posts, Followers, Following */}
+            <div className="flex flex-row gap-6 mt-2 text-sm text-gray-800">
+              <p>
+                <span className="font-semibold">
+                  {userProfile?.posts.length}
+                </span>{" "}
+                posts
+              </p>
+              <p>
+                <span className="font-semibold">
+                  {userProfile?.following.length}
+                </span>{" "}
+                following
+              </p>
+              <p>
+                <span className="font-semibold">
+                  {userProfile?.follower.length}
+                </span>{" "}
+                followers
+              </p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold">{userProfile?.bio || 'add bio here...'}</span>
+              <Badge className='w-fit' variant="secondary">
+                <AtSign /> {" "}{userProfile?.username}</Badge>
+
+                {/* additional details -> profession , about , links */}
+                {/* <div>
+                  {}
+                </div> */}
+            </div>
           </section>
         </div>
+
+        {/* iconbar */}
+        <ProfileIconBar tabChangeFun={handleTabChange} activeTab={activeTab} />
+        {/* posts */}
       </div>
     </div>
   );
