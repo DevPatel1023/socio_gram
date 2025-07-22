@@ -16,16 +16,25 @@ const Profile = () => {
   const { user, userProfile } = useSelector((store) => store.auth);
   const { toggleFollow, isFollowed } = useFollowUser();
   const [status, setStatus] = useState({ loading: true, error: null });
-  const [activeTab,setActiveTab] = useState("posts")
+  const [activeTab, setActiveTab] = useState("posts");
 
   useGetUserProfile(id);
   const isUserOwner = user?._id === id;
   const isFollowing = isFollowed(id);
 
-
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-  }
+  };
+
+  const displayedContent =
+    activeTab === "posts"
+      ? userProfile?.posts
+      : activeTab === "bookmarks"
+      ? userProfile?.bookmarks
+      : [];
+
+    console.log(displayedContent);
+    
 
   useEffect(() => {
     if (!id || id === "undefined" || id === "null") {
@@ -173,12 +182,15 @@ const Profile = () => {
               </p>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="font-semibold">{userProfile?.bio || 'add bio here...'}</span>
-              <Badge className='w-fit' variant="secondary">
-                <AtSign /> {" "}{userProfile?.username}</Badge>
+              <span className="font-semibold">
+                {userProfile?.bio || "add bio here..."}
+              </span>
+              <Badge className="w-fit" variant="secondary">
+                <AtSign /> {userProfile?.username}
+              </Badge>
 
-                {/* additional details -> profession , about , links */}
-                {/* <div>
+              {/* additional details -> profession , about , links */}
+              {/* <div>
                   {}
                 </div> */}
             </div>
@@ -187,7 +199,27 @@ const Profile = () => {
 
         {/* iconbar */}
         <ProfileIconBar tabChangeFun={handleTabChange} activeTab={activeTab} />
-        {/* posts */}
+        {/* posts,reels,saved,tagged */}
+        <div className="grid grid-cols-3 gap-4">
+          {displayedContent?.length > 0 ? (
+            displayedContent.map((post) => (
+              <img
+                key={post._id}
+                src={post.image}
+                alt={post.caption}
+                className="w-full h-60 object-cover rounded"
+              />
+            ))
+          ) : (
+            <p className="text-center col-span-3 text-gray-500 mt-6">
+              {activeTab === "saved"
+                ? "No saved posts yet."
+                : activeTab === "reels" || activeTab === "tagged"
+                ? "This feature is coming soon!"
+                : "No posts available."}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

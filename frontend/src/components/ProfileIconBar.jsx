@@ -9,6 +9,8 @@ const ProfileIconBar = ({ tabChangeFun, activeTab }) => {
   return (
     <div className="border-t border-gray-300 mt-10 pt-4">
       <div className="flex items-center justify-center gap-20 sm:gap-28 md:gap-40 text-sm relative">
+
+        {/* posts */}
         <div className={iconStyle("posts")} onClick={() => tabChangeFun("posts")}>
           <Grid size={24} />
           <span className="absolute top-[30px] text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -16,6 +18,7 @@ const ProfileIconBar = ({ tabChangeFun, activeTab }) => {
           </span>
         </div>
 
+        {/* reels */}
         <div className={iconStyle("reels")} onClick={() => tabChangeFun("reels")}>
           <PlayCircle size={24} />
           <span className="absolute top-[30px] text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -23,6 +26,7 @@ const ProfileIconBar = ({ tabChangeFun, activeTab }) => {
           </span>
         </div>
 
+        {/* saved */}
         <div className={iconStyle("saved")} onClick={() => tabChangeFun("saved")}>
           <Bookmark size={24} />
           <span className="absolute top-[30px] text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -30,6 +34,7 @@ const ProfileIconBar = ({ tabChangeFun, activeTab }) => {
           </span>
         </div>
 
+        {/* tagged */}
         <div className={iconStyle("tagged")} onClick={() => tabChangeFun("tagged")}>
           <SquareUser size={24} />
           <span className="absolute top-[30px] text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
