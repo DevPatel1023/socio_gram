@@ -1,12 +1,12 @@
 // src/components/Profile.jsx
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import useGetUserProfile from "../hooks/useGetUserProfile";
 import useFollowUser from "../hooks/useFollowUser";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { AtSign, Settings, UserPlus } from "lucide-react";
+import { AtSign, Heart, MessageCircle, Settings, UserPlus } from "lucide-react";
 import { FiMoreHorizontal } from "react-icons/fi";
 import { Badge } from "./ui/badge";
 import ProfileIconBar from "./ProfileIconBar";
@@ -33,8 +33,7 @@ const Profile = () => {
       ? userProfile?.bookmarks
       : [];
 
-    console.log(displayedContent);
-    
+  console.log(displayedContent);
 
   useEffect(() => {
     if (!id || id === "undefined" || id === "null") {
@@ -103,12 +102,14 @@ const Profile = () => {
 
               {isUserOwner ? (
                 <div className="flex flex-row flex-wrap gap-2">
-                  <Button
-                    variant="secondary"
-                    className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
-                  >
-                    Edit profile
-                  </Button>
+                  <Link to="/profile/edit">
+                    <Button
+                      variant="secondary"
+                      className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
+                    >
+                      Edit profile
+                    </Button>
+                  </Link>
                   <Button
                     variant="secondary"
                     className="bg-gray-900 hover:bg-gray-800 h-8 text-white"
@@ -203,12 +204,32 @@ const Profile = () => {
         <div className="grid grid-cols-3 gap-4">
           {displayedContent?.length > 0 ? (
             displayedContent.map((post) => (
-              <img
-                key={post._id}
-                src={post.image}
-                alt={post.caption}
-                className="w-full h-60 object-cover rounded"
-              />
+              <div className="relative group cursor-pointer">
+                <img
+                  key={post._id}
+                  src={post.image}
+                  alt={post.caption}
+                  className="w-full h-60 object-cover rounded"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="flex items-center text-white space-x-4">
+                    <Button
+                      variant="ghost"
+                      className="flex items-center gap-2 text-current hover:text-gray-400 hover:bg-transparent"
+                    >
+                      <Heart />
+                      <span>{post?.likes?.length}</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="flex items-center gap-2 text-current hover:text-gray-400 hover:bg-transparent"
+                    >
+                      <MessageCircle />
+                      <span>{post?.comments?.length}</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
             ))
           ) : (
             <p className="text-center col-span-3 text-gray-500 mt-6">
