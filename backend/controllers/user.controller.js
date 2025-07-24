@@ -276,9 +276,9 @@ export const getInboxUsers = async (req, res) => {
     );
 
     const inboxUsers = [
-      ...mutuals.map(user => ({ user, type: 'mutual' })),
-      ...followersOnly.map(user => ({ user, type: 'followerOnly' })),
-      ...followingOnly.map(user => ({ user, type: 'followingOnly' }))
+      ...mutuals.map(user => ({ user, type: 'mutuals' })),
+      ...followersOnly.map(user => ({ user, type: 'followers' })),
+      ...followingOnly.map(user => ({ user, type: 'followings' }))
     ];
 
     res.status(200).json({

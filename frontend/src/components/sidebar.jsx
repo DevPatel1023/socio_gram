@@ -25,6 +25,7 @@ const Sidebar = () => {
   const { user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+  const isMessagePage = location.pathname.startsWith("/inbox");
 
   const createPostHandler = (e) => {
     e.preventDefault();
@@ -67,15 +68,44 @@ const Sidebar = () => {
 
   const navItems = [
     { icon: <Home size={24} />, text: "Home", link: "/", type: "link" },
-    { icon: <Search size={24} />, text: "Search", link: "/search", type: "link" },
-    { icon: <TrendingUp size={24} />, text: "Explore", link: "/explore", type: "link" },
-    { icon: <MessageCircle size={24} />, text: "Messages", link: "/inbox", type: "link" },
-    { icon: <Heart size={24} />, text: "Notifications", link: "/notifications", type: "link" },
-    { icon: <PlusSquare size={24} />, text: "Create", onClick: createPostHandler, type: "button" },
+    {
+      icon: <Search size={24} />,
+      text: "Search",
+      link: "/search",
+      type: "link",
+    },
+    {
+      icon: <TrendingUp size={24} />,
+      text: "Explore",
+      link: "/explore",
+      type: "link",
+    },
+    {
+      icon: <MessageCircle size={24} />,
+      text: "Messages",
+      link: "/inbox",
+      type: "link",
+    },
+    {
+      icon: <Heart size={24} />,
+      text: "Notifications",
+      link: "/notifications",
+      type: "link",
+    },
+    {
+      icon: <PlusSquare size={24} />,
+      text: "Create",
+      onClick: createPostHandler,
+      type: "button",
+    },
     {
       icon: (
         <Avatar className="w-6 h-6">
-          <AvatarImage src={user?.profilePicture} className="w-6 h-6" alt="profilepic" />
+          <AvatarImage
+            src={user?.profilePicture}
+            className="w-6 h-6"
+            alt="profilepic"
+          />
           <AvatarFallback>
             <User size={16} />
           </AvatarFallback>
@@ -104,13 +134,18 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col bg-white border-r border-gray-200 h-screen fixed top-0 left-0 z-30 transition-all duration-300 ease-in-out w-16 lg:w-64 shadow-sm">
+      <aside
+        className={`hidden md:flex flex-col bg-white border-r border-gray-200 h-screen fixed top-0 left-0 z-30 transition-all duration-300 ease-in-out 
+  ${isMessagePage ? "w-16" : "w-16 lg:w-64"} shadow-sm`}
+      >
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center justify-center lg:justify-start">
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center lg:mr-3">
               <span className="text-white font-bold text-sm">S</span>
             </div>
-            <h1 className="text-xl font-bold text-gray-900 hidden lg:block">Sociogram</h1>
+            {!isMessagePage && (<h1 className="text-xl font-bold text-gray-900 hidden lg:block">
+              Sociogram
+            </h1>)}
           </div>
         </div>
         <nav className="flex-1 px-3 py-6 space-y-2">
@@ -121,12 +156,16 @@ const Sidebar = () => {
                 <Link key={index} to={item.link} className={baseClasses}>
                   <span
                     className={`flex-shrink-0 transition-colors duration-200 ${
-                      isActiveLink(item.link) ? "text-purple-600" : "text-gray-500"
+                      isActiveLink(item.link)
+                        ? "text-purple-600"
+                        : "text-gray-500"
                     }`}
                   >
                     {item.icon}
                   </span>
-                  <span className="ml-3 hidden lg:block truncate">{item.text}</span>
+                  <span className="ml-3 hidden lg:block truncate">
+                    {item.text}
+                  </span>
                   {isActiveLink(item.link) && (
                     <div className="ml-auto w-2 h-2 bg-purple-600 rounded-full hidden lg:block" />
                   )}
@@ -134,11 +173,17 @@ const Sidebar = () => {
               );
             } else {
               return (
-                <button key={index} onClick={item.onClick} className={baseClasses}>
+                <button
+                  key={index}
+                  onClick={item.onClick}
+                  className={baseClasses}
+                >
                   <span className="flex-shrink-0 text-gray-500 transition-colors duration-200 group-hover:text-gray-900">
                     {item.icon}
                   </span>
-                  <span className="ml-3 hidden lg:block truncate">{item.text}</span>
+                  <span className="ml-3 hidden lg:block truncate">
+                    {item.text}
+                  </span>
                 </button>
               );
             }
@@ -153,7 +198,9 @@ const Sidebar = () => {
             <span className="flex-shrink-0 text-gray-500 group-hover:text-red-600 transition-colors duration-200">
               <LogOut size={24} />
             </span>
-            <span className="ml-3 hidden lg:block">{isLoading ? "Logging out..." : "Logout"}</span>
+            <span className="ml-3 hidden lg:block">
+              {isLoading ? "Logging out..." : "Logout"}
+            </span>
           </button>
         </div>
       </aside>
@@ -170,7 +217,9 @@ const Sidebar = () => {
               return (
                 <Link key={index} to={item.link} className={baseClasses}>
                   <span className="mb-1 scale-90">{item.icon}</span>
-                  <span className="text-xs font-medium leading-none">{item.text}</span>
+                  <span className="text-xs font-medium leading-none">
+                    {item.text}
+                  </span>
                   {isActiveLink(item.link) && (
                     <div className="absolute -top-1 w-1 h-1 bg-purple-600 rounded-full" />
                   )}
@@ -178,9 +227,15 @@ const Sidebar = () => {
               );
             } else {
               return (
-                <button key={index} onClick={item.onClick} className={baseClasses}>
+                <button
+                  key={index}
+                  onClick={item.onClick}
+                  className={baseClasses}
+                >
                   <span className="mb-1 scale-90">{item.icon}</span>
-                  <span className="text-xs font-medium leading-none">{item.text}</span>
+                  <span className="text-xs font-medium leading-none">
+                    {item.text}
+                  </span>
                 </button>
               );
             }
@@ -195,7 +250,11 @@ const Sidebar = () => {
           >
             <span className="mb-1 scale-90">
               <Avatar className="w-6 h-6">
-                <AvatarImage src={user?.profilePicture} className="w-6 h-6" alt="profilepic" />
+                <AvatarImage
+                  src={user?.profilePicture}
+                  className="w-6 h-6"
+                  alt="profilepic"
+                />
                 <AvatarFallback>
                   <User size={14} />
                 </AvatarFallback>
