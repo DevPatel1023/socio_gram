@@ -199,7 +199,7 @@ const Sidebar = () => {
               <LogOut size={24} />
             </span>
             <span className="ml-3 hidden lg:block">
-              {isLoading ? "Logging out..." : "Logout"}
+              {isMessagePage &&(isLoading ? "Logging out..." : "Logout")}
             </span>
           </button>
         </div>
