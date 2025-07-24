@@ -69,7 +69,7 @@ const Sidebar = () => {
     { icon: <Home size={24} />, text: "Home", link: "/", type: "link" },
     { icon: <Search size={24} />, text: "Search", link: "/search", type: "link" },
     { icon: <TrendingUp size={24} />, text: "Explore", link: "/explore", type: "link" },
-    { icon: <MessageCircle size={24} />, text: "Messages", link: "/messages", type: "link" },
+    { icon: <MessageCircle size={24} />, text: "Messages", link: "/inbox", type: "link" },
     { icon: <Heart size={24} />, text: "Notifications", link: "/notifications", type: "link" },
     { icon: <PlusSquare size={24} />, text: "Create", onClick: createPostHandler, type: "button" },
     {

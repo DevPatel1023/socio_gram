@@ -245,3 +245,48 @@ export const followOrUnfollow = async (req, res) => {
         console.log(error);
     }
 }
+
+
+// inbox users 
+
+export const getInboxUsers = async (req, res) => {
+  try {
+    const currentUserId = req.id;
+
+    const currentUser = await User.findById(currentUserId)
+      .populate('follower', 'username profilePicture')
+      .populate('following', 'username profilePicture');
+
+    const followers = currentUser.follower.map(user => user._id.toString());
+    const following = currentUser.following.map(user => user._id.toString());
+
+    // Mutuals: users who are both in followers and following
+    const mutuals = currentUser.follower.filter(user =>
+      following.includes(user._id.toString())
+    );
+
+    // Followers only (they follow you, you don't follow back)
+    const followersOnly = currentUser.follower.filter(user =>
+      !following.includes(user._id.toString())
+    );
+
+    // Following only (you follow them, they don't follow you back)
+    const followingOnly = currentUser.following.filter(user =>
+      !followers.includes(user._id.toString())
+    );
+
+    const inboxUsers = [
+      ...mutuals.map(user => ({ user, type: 'mutual' })),
+      ...followersOnly.map(user => ({ user, type: 'followerOnly' })),
+      ...followingOnly.map(user => ({ user, type: 'followingOnly' }))
+    ];
+
+    res.status(200).json({
+      inboxUsers,
+      message: 'Fetched inbox users'
+    });
+  } catch (error) {
+    console.error("Error fetching inbox users:", error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};

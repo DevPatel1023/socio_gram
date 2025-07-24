@@ -1,5 +1,5 @@
 import express from 'express';
-import { editProfile, followOrUnfollow, getProfile, getSuggestedUsers, login, logout, register } from '../controllers/user.controller.js';
+import { editProfile, followOrUnfollow, getInboxUsers, getProfile, getSuggestedUsers, login, logout, register } from '../controllers/user.controller.js';
 import isAuthenticated from '../middlewares/isAuthenticated.js';
 import upload from '../middlewares/multer.js';
 
@@ -12,6 +12,7 @@ router.route('/:id/profile').get(isAuthenticated,getProfile);
 router.route('/profile/edit').patch(isAuthenticated,upload.single('profilePicture'),editProfile);
 router.route('/suggesteduser').get(isAuthenticated,getSuggestedUsers);
 router.route('/followorunfollow/:id').post(isAuthenticated,followOrUnfollow);
+router.route('/inbox').get(isAuthenticated,getInboxUsers);
 
 
 export default router;

@@ -183,7 +183,7 @@ const Profile = () => {
               </p>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="font-semibold">
+              <span className="font-semibold whitespace-pre-line">
                 {userProfile?.bio || "add bio here..."}
               </span>
               <Badge className="w-fit" variant="secondary">
