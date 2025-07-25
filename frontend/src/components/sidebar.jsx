@@ -143,9 +143,11 @@ const Sidebar = () => {
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center lg:mr-3">
               <span className="text-white font-bold text-sm">S</span>
             </div>
-            {!isMessagePage && (<h1 className="text-xl font-bold text-gray-900 hidden lg:block">
-              Sociogram
-            </h1>)}
+            {!isMessagePage && (
+              <h1 className="text-xl font-bold text-gray-900 hidden lg:block">
+                Sociogram
+              </h1>
+            )}
           </div>
         </div>
         <nav className="flex-1 px-3 py-6 space-y-2">
@@ -198,9 +200,11 @@ const Sidebar = () => {
             <span className="flex-shrink-0 text-gray-500 group-hover:text-red-600 transition-colors duration-200">
               <LogOut size={24} />
             </span>
-            <span className="ml-3 hidden lg:block">
-              {isMessagePage &&(isLoading ? "Logging out..." : "Logout")}
-            </span>
+            {!isMessagePage && (
+              <span className="ml-3 hidden lg:block">
+                {isLoading ? "Logging out..." : "Logout"}
+              </span>
+            )}
           </button>
         </div>
       </aside>
