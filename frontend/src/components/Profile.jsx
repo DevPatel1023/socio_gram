@@ -33,7 +33,6 @@ const Profile = () => {
       ? userProfile?.bookmarks
       : [];
 
-  console.log(displayedContent);
 
   useEffect(() => {
     if (!id || id === "undefined" || id === "null") {
@@ -204,7 +203,8 @@ const Profile = () => {
         <div className="grid grid-cols-3 gap-4">
           {displayedContent?.length > 0 ? (
             displayedContent.map((post) => (
-              <div className="relative group cursor-pointer">
+              <div className="relative group cursor-pointer"
+              key={post._id}>
                 <img
                   key={post._id}
                   src={post.image}

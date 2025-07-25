@@ -1,12 +1,13 @@
 import "./App.css";
 import Signup from "./components/signup.jsx";
 import Login from "./components/Login.jsx";
-import { createBrowserRouter ,RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "./components/MainLayout";
 import Home from "./components/Home";
 import Profile from "./components/Profile";
 import EditProfile from "./components/EditProfile";
 import MessagePage from "./components/MessagePage";
+import ChatInterface from "./components/ChatInterface";
 
 const browserRouter = createBrowserRouter([
   {
@@ -29,15 +30,21 @@ const browserRouter = createBrowserRouter([
       {
         path: "/inbox",
         element: <MessagePage />,
+        children: [
+          {
+            path: ":id",
+            element: <ChatInterface />,
+          },
+        ],
       },
     ],
   },
   {
-    path: '/login',
+    path: "/login",
     element: <Login />,
   },
   {
-    path: '/signup',
+    path: "/signup",
     element: <Signup />,
   },
 ]);
