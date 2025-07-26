@@ -1,7 +1,7 @@
-import {server} from 'socket.io';
+import {Server} from 'socket.io';
 import express from 'express';
 import http from 'http'
-import { use } from 'react';
+
 
 const app = express();
 
@@ -30,7 +30,7 @@ io.on('connection',(socket)=>{
         if(userId){
             delete userSocketMap[userId]
         }
-        io.emit('getOnlineUser',Object.keys(userSocketMap));
+        io.emit('getOnlineUsers',Object.keys(userSocketMap));
     })
 });
 
