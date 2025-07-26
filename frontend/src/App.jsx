@@ -55,35 +55,38 @@ const browserRouter = createBrowserRouter([
 ]);
 
 function App() {
-  const { user } = useSelector((store) => store.auth);
+   const { user } = useSelector(store => store.auth);
+  const { socket } = useSelector(store => store.socketio);
   const dispatch = useDispatch();
 
   useEffect(() => {
-  let socketio; 
+    if (user) {
+      const socketio = io('http://localhost:8000', {
+        query: {
+          userId: user?._id
+        },
+        transports: ['websocket']
+      });
+      dispatch(setSocket(socketio));
 
-  if (user) {
-    socketio = io("http://localhost:8000", {
-      query: {
-        userId: user._id,
-      },
-      transports: ["websocket"],
-    });
+      // listen all the events
+      socketio.on('getOnlineUsers', (onlineUsers) => {
+        dispatch(setOnlineUsers(onlineUsers));
+      });
 
-    dispatch(setSocket(socketio));
+      socketio.on('notification', (notification) => {
+        dispatch(setLikeNotification(notification));
+      });
 
-    socketio.on("getOnlineUsers", (onlineUsers) => {
-      dispatch(setOnlineUsers(onlineUsers));
-    });
-  }
-
-  return () => {
-    if (socketio) {
-      socketio.close();
+      return () => {
+        socketio.close();
+        dispatch(setSocket(null));
+      }
+    } else if (socket) {
+      socket.close();
       dispatch(setSocket(null));
     }
-  };
-}, [user, dispatch]);
-
+  }, [user, dispatch]);
 
   return (
     <>

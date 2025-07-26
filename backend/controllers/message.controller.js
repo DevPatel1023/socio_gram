@@ -1,5 +1,6 @@
 import Conversation from "../models/conversation.model.js"
 import { Message } from "../models/message.model.js";
+import { getRecieverSocketId, io } from "../socket/socket.js";
 
 // for chat logic
 export const sendMesssage = async (req,res) => {
@@ -31,6 +32,12 @@ export const sendMesssage = async (req,res) => {
     }
 
     // implement socket.io for real time data transfer
+
+    const recieverSockerId = getRecieverSocketId(recieverId);
+    if(recieverSockerId){
+        io.to(recieverSockerId.emit('newMessage',newMessage));
+    }
+
     return res.status(201).json({
         success : true ,
         newMessage

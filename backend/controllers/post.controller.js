@@ -3,6 +3,7 @@ import cloudinary from '../utils/cloudinary.js';
 import { Post } from '../models/post.model.js';
 import { User } from '../models/user.model.js';
 import { Comment } from '../models/comment.model.js';
+import { getRecieverSocketId } from '../socket/socket.js';
 
 export const addNewPost = async(req,res)=>{
     try {
@@ -115,6 +116,21 @@ export const likepost = async (req,res) => {
         await post.save();
 
         //implement socket.io for real time notification
+         const user = await User.findById(likeuserId).select('username profilePicture');
+        const postOwnerId = post.author.toString();
+        if(postOwnerId !== likeuserId){
+            // emit a notification event
+            const notification = { 
+                type : 'like',
+                userId : likeuserId,
+                userDetails : user,
+                postId,
+                message : 'your post was liked'
+            }
+            const postOwnerSocketId = getRecieverSocketId(postOwnerId);
+            io.to(postOwnerSocketId).emit('notification',notification)
+        }
+
         return res.status(200).json({
             message : 'User Liked' ,
             post,
@@ -146,6 +162,23 @@ export const dislikepost = async (req,res) => {
         await post.save();
 
         //implement socket.io for real time notification
+        const user = await User.findById(likeuserId).select('username profilePicture');
+        const postOwnerId = post.author.toString();
+        if(postOwnerId !== likeuserId){
+            // emit a notification event
+            const notification = { 
+                type : 'dislike',
+                userId : likeuserId,
+                userDetails : user,
+                postId,
+                message : 'your post was liked'
+            }
+            const postOwnerSocketId = getRecieverSocketId(postOwnerId);
+            io.to(postOwnerSocketId).emit('notification',notification)
+        }
+
+    
+
         return res.status(200).json({
             message : 'User DisLiked' ,
             post,
