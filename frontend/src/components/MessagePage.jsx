@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import useUserFriends from "@/hooks/useUserFriends";
@@ -13,6 +13,10 @@ const MessagePage = () => {
   const { inboxUsers, loading, error } = useUserFriends();
   const { onlineUsers } = useSelector((store) => store.chat);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    dispatch(setSelectedUserInbox(null));
+  }, [dispatch]);
 
   const handleUserSelect = (userId) => {
     dispatch(setSelectedUserInbox(userId));
@@ -70,7 +74,7 @@ const MessagePage = () => {
           <div className="flex-1 overflow-y-auto">
             <div className="px-2 py-2">
               {inboxUsers.map(({ user }) => {
-                const isOnline = onlineUsers.includes(user?._id);
+                const isOnline = onlineUsers?.includes(user?._id);
 
                 return (
                   <div
@@ -102,7 +106,6 @@ const MessagePage = () => {
                         <h3 className="font-medium text-gray-900 truncate">
                           {user?.username}
                         </h3>
-                        {/* Optional placeholder for layout spacing */}
                         <span className="text-xs text-gray-500">&nbsp;</span>
                       </div>
                       <div className="flex items-center justify-between mt-1">
