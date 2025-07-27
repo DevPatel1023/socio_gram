@@ -5,6 +5,7 @@ import { Plus, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
 
 const Stories = ({ 
+
   stories = [
     {
       id: 1,

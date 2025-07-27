@@ -26,6 +26,7 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const isMessagePage = location.pathname.startsWith("/inbox");
+  const {likeNotification} = useSelector(store=>store.realTimeNotification);
 
   const createPostHandler = (e) => {
     e.preventDefault();
