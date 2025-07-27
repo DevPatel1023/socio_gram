@@ -6,15 +6,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { Phone, Video, Info, Smile, Image, Mic, Send } from "lucide-react";
 import axios from "axios";
 import { setMessages } from "@/redux/chatSlice";
+import useGetAllMessages from "@/hooks/useGetAllMessages";
 
 const ChatInterface = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
+
+  // Fetch user profile based on URL id
   useGetUserProfile(id);
 
-  const { userProfile } = useSelector((state) => state.auth);
+  // Fetch all messages for selectedUserInbox from Redux
+  useGetAllMessages();
+
+  const { userProfile, user, selectedUserInbox } = useSelector((state) => state.auth);
   const { messages } = useSelector((state) => state.chat);
+
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
   // Scroll to bottom when messages change
@@ -22,35 +30,24 @@ const ChatInterface = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Fetch messages on component mount or when `id` changes
+  // Optional: If you want to stop loading when profile and messages are ready
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8000/api/v1/message/${id}`,
-          { withCredentials: true }
-        );
-        if (res.data?.success) {
-          dispatch(setMessages(res.data.messages));
-        }
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
-    };
+    if (userProfile && messages) setLoading(false);
+  }, [userProfile, messages]);
 
-    if (id) fetchMessages();
-  }, [id, dispatch]);
-
-  // Helper for safe image rendering
+  // Safe image source
   const getSafeImageSrc = (src) => (src && src.trim() !== "" ? src : null);
 
   const sendMessageHandler = async (receiverId) => {
     if (!message.trim()) return;
 
+    const originalMessage = message;
+    setMessage(""); 
+
     try {
       const res = await axios.post(
         `http://localhost:8000/api/v1/message/send/${receiverId}`,
-        { message },
+        { message: originalMessage },
         {
           headers: {
             "Content-Type": "application/json",
@@ -59,21 +56,33 @@ const ChatInterface = () => {
         }
       );
 
-      if (res.data.success) {
-        dispatch(setMessages([...messages, res.data.newMessage]));
-        setMessage("");
+      if (res.data?.success) {
+        const currentMessages = Array.isArray(messages) ? messages : [];
+        dispatch(setMessages([...currentMessages, res.data.newMessage]));
       }
     } catch (error) {
       console.error("Error sending message:", error);
+      setMessage(originalMessage); // restore on error
     }
   };
 
-  if (!userProfile)
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessageHandler(id);
+    }
+  };
+
+  if (loading || !userProfile) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">Loading chat...</p>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+          <p className="text-gray-500">Loading chat...</p>
+        </div>
       </div>
     );
+  }
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -102,25 +111,16 @@ const ChatInterface = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <Phone
-            size={20}
-            className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors"
-          />
-          <Video
-            size={20}
-            className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors"
-          />
-          <Info
-            size={20}
-            className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors"
-          />
+          <Phone size={20} className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors" />
+          <Video size={20} className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors" />
+          <Info size={20} className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors" />
         </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-4 bg-gray-50">
         <div className="space-y-4">
-          {messages?.length === 0 && (
+          {(!messages || messages.length === 0) && (
             <div className="text-center py-8">
               <Avatar className="w-16 h-16 mx-auto mb-4">
                 <AvatarImage
@@ -131,39 +131,39 @@ const ChatInterface = () => {
                   {userProfile?.username?.charAt(0)?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <h3 className="font-semibold text-gray-900 mb-1">
-                {userProfile?.username}
-              </h3>
-              <p className="text-sm text-gray-500 mb-2">
-                {userProfile?.bio || "No bio available"}
-              </p>
-              <p className="text-xs text-gray-400">
-                You're friends on Instagram
-              </p>
+              <h3 className="font-semibold text-gray-900 mb-1">{userProfile?.username}</h3>
+              <p className="text-sm text-gray-500 mb-2">{userProfile?.bio || "No bio available"}</p>
+              <p className="text-xs text-gray-400">Start your conversation</p>
             </div>
           )}
 
           {Array.isArray(messages) &&
-            messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  msg.sender === userProfile._id
-                    ? "justify-start"
-                    : "justify-end"
-                }`}
-              >
-                <div
-                  className={`px-4 py-2 rounded-2xl max-w-xs ${
-                    msg.sender === userProfile._id
-                      ? "bg-gray-200 text-gray-900 rounded-tl-md"
-                      : "bg-blue-500 text-white rounded-tr-md"
-                  }`}
-                >
-                  <p>{msg.content}</p>
+            messages.map((msg, index) => {
+              if (typeof msg === "string") {
+                // skip malformed message
+                return null;
+              }
+
+              let isCurrentUser = false;
+
+              if (msg.senderId) {
+                if (typeof msg.senderId === "object" && msg.senderId._id) {
+                  isCurrentUser = msg.senderId._id.toString() === user?._id?.toString();
+                } else if (typeof msg.senderId === "string") {
+                  isCurrentUser = msg.senderId.toString() === user?._id?.toString();
+                }
+              }
+
+              return (
+                <div key={msg._id || `msg-${index}`} className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}>
+                  <div className={`px-4 py-2 rounded-2xl max-w-xs break-words ${
+                    isCurrentUser ? "bg-blue-500 text-white rounded-tr-md" : "bg-gray-200 text-gray-900 rounded-tl-md"
+                  }`}>
+                    <p className="text-sm">{msg.messages || "No content"}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
           <div ref={messagesEndRef} />
         </div>
@@ -177,18 +177,13 @@ const ChatInterface = () => {
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
               placeholder="Message..."
               className="w-full px-4 py-2.5 pr-20 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200"
             />
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-              <Smile
-                size={16}
-                className="text-gray-500 cursor-pointer hover:text-gray-700"
-              />
-              <Image
-                size={16}
-                className="text-gray-500 cursor-pointer hover:text-gray-700"
-              />
+              <Smile size={16} className="text-gray-500 cursor-pointer hover:text-gray-700" />
+              <Image size={16} className="text-gray-500 cursor-pointer hover:text-gray-700" />
             </div>
           </div>
 

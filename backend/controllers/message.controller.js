@@ -1,75 +1,87 @@
-import Conversation from "../models/conversation.model.js"
+import mongoose from "mongoose";
+import Conversation from "../models/conversation.model.js";
 import { Message } from "../models/message.model.js";
 import { getRecieverSocketId, io } from "../socket/socket.js";
 
-// for chat logic
-export const sendMesssage = async (req,res) => {
-    try {
-       const senderId = req.id;
-       const receiverId = req.params.id;
+// Send a message
+export const sendMesssage = async (req, res) => {
+  try {
+    const senderId = req.id;
+    const receiverId = req.params.id;
+    const { message } = req.body;
 
-       const { message } = req.body;
+    let conversation = await Conversation.findOne({
+      participants: { $all: [senderId, receiverId] }
+    });
 
-       let conversation = await Conversation.findOne({
-        participants : {$all : [senderId,receiverId]}
-       });
-
-    //    establish the convo if not started yet
-    if(!conversation){
-        conversation = await Conversation.create({
-            participants : [senderId,receiverId]
-        }) ;
+    if (!conversation) {
+      conversation = await Conversation.create({
+        participants: [senderId, receiverId]
+      });
     }
+
     const newMessage = await Message.create({
-        senderId,
-        receiverId,
-        message
-    })
-    if(newMessage){
-        conversation.messages.push(newMessage._id);
-        
-        await Promise.all([conversation.save(),newMessage.save()])
+      senderId,
+      receiverId,
+      message
+    });
+
+    if (newMessage) {
+      conversation.messages.push(newMessage._id);
+      await Promise.all([conversation.save(), newMessage.save()]);
     }
 
-    // implement socket.io for real time data transfer
+    // ✅ Populate senderId before returning
+    const populatedMessage = await newMessage.populate("senderId", "_id username");
 
-    const recieverSockerId = getRecieverSocketId(recieverId);
-    if(recieverSockerId){
-        io.to(recieverSockerId.emit('newMessage',newMessage));
+    const receiverSocketId = getRecieverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('newMessage', populatedMessage);
     }
 
     return res.status(201).json({
-        success : true ,
-        newMessage
-    })
-    } catch (error) {
-        console.error(error);
+      success: true,
+      newMessage: populatedMessage
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, error: "Server error" });
+  }
+};
+
+// Get all messages
+export const getMessage = async (req, res) => {
+  try {
+    const senderId = req.id;
+    const receiverId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(senderId) || !mongoose.Types.ObjectId.isValid(receiverId)) {
+      return res.status(400).json({ error: "Invalid user ID(s)" });
     }
-}
 
-// get message
-export const getMessage = async (req,res) => {
-    try {
-        const senderId = req.id;
-        const receiverId = req.params.id;
+    const conversation = await Conversation.findOne({
+      participants: { $all: [senderId, receiverId] }
+    }).populate({
+      path: "messages",
+      populate: {
+        path: "senderId",
+        select: "_id username"
+      }
+    });
 
-        const conversation = await Conversation.find({
-            participants : {$all : [senderId , receiverId]}
-        });
-
-        // check if not conversation
-        if(!conversation){
-            return res.status(200).json({
-                success : true ,
-                messages : []
-            });
-        }
-
-        return res.status(200).json({
-            success : true ,
-            messages : conversation?.messages 
-        });
-    } catch (error) {
-        console.log(error);
+    if (!conversation) {
+      return res.status(200).json({
+        success: true,
+        messages: []
+      });
     }
-}
+
+    return res.status(200).json({
+      success: true,
+      messages: conversation.messages
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, error: "Server error" });
+  }
+};
