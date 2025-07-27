@@ -31,7 +31,6 @@ export const sendMesssage = async (req, res) => {
       await Promise.all([conversation.save(), newMessage.save()]);
     }
 
-    // ✅ Populate senderId before returning
     const populatedMessage = await newMessage.populate("senderId", "_id username");
 
     const receiverSocketId = getRecieverSocketId(receiverId);

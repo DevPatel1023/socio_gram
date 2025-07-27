@@ -7,6 +7,7 @@ import { Phone, Video, Info, Smile, Image, Mic, Send } from "lucide-react";
 import axios from "axios";
 import { setMessages } from "@/redux/chatSlice";
 import useGetAllMessages from "@/hooks/useGetAllMessages";
+import useGetRealTimeMsg from "@/hooks/useGetRealTimeMsg";
 
 const ChatInterface = () => {
   const { id } = useParams();
@@ -16,7 +17,10 @@ const ChatInterface = () => {
   useGetUserProfile(id);
 
   // Fetch all messages for selectedUserInbox from Redux
-  useGetAllMessages();
+  useGetAllMessages(id);
+
+  // real time message call
+  useGetRealTimeMsg();
 
   const { userProfile, user, selectedUserInbox } = useSelector((state) => state.auth);
   const { messages } = useSelector((state) => state.chat);
@@ -159,7 +163,7 @@ const ChatInterface = () => {
                   <div className={`px-4 py-2 rounded-2xl max-w-xs break-words ${
                     isCurrentUser ? "bg-blue-500 text-white rounded-tr-md" : "bg-gray-200 text-gray-900 rounded-tl-md"
                   }`}>
-                    <p className="text-sm">{msg.messages || "No content"}</p>
+                    <p className="text-sm">{msg.messages || msg.message || "No content"}</p>
                   </div>
                 </div>
               );
