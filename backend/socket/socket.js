@@ -16,9 +16,9 @@ const io = new Server(server,{
 const userSocketMap = {} ; 
 //userid->socket id
 
-// FIX: Added missing return statement
+// Added missing return statement
 export const getRecieverSocketId = (reciverId) => {
-    return userSocketMap[reciverId]; // This was missing!
+    return userSocketMap[reciverId];
 }
 
 io.on('connection',(socket)=>{

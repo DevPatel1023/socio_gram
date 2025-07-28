@@ -17,6 +17,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { setAuthUser } from "@/redux/authSlide";
 import CreatePost from "./CreatePost";
 import { setPosts, setSelectedPost } from "@/redux/postSlice";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "./ui/button";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -168,6 +170,25 @@ const Sidebar = () => {
                   </span>
                   <span className="ml-3 hidden lg:block truncate">
                     {item.text}
+                    {
+                      item.text === 'Notifications' && likeNotification.length > 0 && (
+                        <Popover>
+                          <PopoverTrigger asChild>
+  <Button size='icon' className='rounded-full h-5 w-5 absolute bottom-6 left-6'>{likeNotification.length}</Button>
+
+                          </PopoverTrigger>
+                          <PopoverContent>
+                            <div>
+                              {
+                                likeNotification.length === 0 ? (<p>no new notification</p>) : 
+                                likeNotification.map()
+                              }
+                            </div>
+                          </PopoverContent>
+                        </Popover> 
+                        
+                      )
+                    }
                   </span>
                   {isActiveLink(item.link) && (
                     <div className="ml-auto w-2 h-2 bg-purple-600 rounded-full hidden lg:block" />
