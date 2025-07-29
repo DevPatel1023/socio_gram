@@ -28,7 +28,9 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const isMessagePage = location.pathname.startsWith("/inbox");
-  const {likeNotification} = useSelector(store=>store.realTimeNotification);
+  const { likeNotification } = useSelector(
+    (store) => store.realTimeNotification
+  );
 
   const createPostHandler = (e) => {
     e.preventDefault();
@@ -94,6 +96,7 @@ const Sidebar = () => {
       text: "Notifications",
       link: "/notifications",
       type: "link",
+      isNotification: true, // Flag to identify notification item
     },
     {
       icon: <PlusSquare size={24} />,
@@ -115,7 +118,7 @@ const Sidebar = () => {
         </Avatar>
       ),
       text: user?.username || "Profile",
-      link: `/profile/${user._id}`, // Fixed: Correct route to match /profile/:id
+      link: `/profile/${user._id}`,
       type: "link",
     },
   ];
@@ -156,7 +159,80 @@ const Sidebar = () => {
         <nav className="flex-1 px-3 py-6 space-y-2">
           {navItems.map((item, index) => {
             const baseClasses = getBaseClasses(item);
+            
             if (item.type === "link") {
+              // Special handling for notifications item
+              if (item.isNotification && likeNotification.length > 0) {
+                return (
+                  <div key={index} className="relative">
+                    <Link to={item.link} className={baseClasses}>
+                      <span
+                        className={`flex-shrink-0 transition-colors duration-200 ${
+                          isActiveLink(item.link)
+                            ? "text-purple-600"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {item.icon}
+                      </span>
+                      <span className="ml-3 hidden lg:block truncate">
+                        {item.text}
+                      </span>
+                      {isActiveLink(item.link) && (
+                        <div className="ml-auto w-2 h-2 bg-purple-600 rounded-full hidden lg:block" />
+                      )}
+                    </Link>
+                    
+                    {/* Notification badge with popover */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          size="icon"
+                          className="absolute -top-1 -right-1 rounded-full h-5 w-5 bg-red-500 hover:bg-red-600 text-white text-xs p-0 min-w-0 border-2 border-white"
+                        >
+                          {likeNotification.length}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-sm text-gray-900 mb-3">
+                            Notifications
+                          </h4>
+                          {likeNotification.length === 0 ? (
+                            <p className="text-sm text-gray-500">No new notifications</p>
+                          ) : (
+                            <div className="space-y-3 max-h-60 overflow-y-auto">
+                              {likeNotification.map((notification) => (
+                                <div key={notification.userId} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-md">
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarImage
+                                      src={notification.userDetails?.profilePicture}
+                                      alt={notification.userDetails?.username}
+                                    />
+                                    <AvatarFallback>
+                                      <User size={14} />
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm text-gray-900">
+                                      <span className="font-medium">
+                                        {notification.userDetails?.username}
+                                      </span>{" "}
+                                      liked your post
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                );
+              }
+              
+              // Regular link items
               return (
                 <Link key={index} to={item.link} className={baseClasses}>
                   <span
@@ -170,34 +246,6 @@ const Sidebar = () => {
                   </span>
                   <span className="ml-3 hidden lg:block truncate">
                     {item.text}
-                    {
-                      item.text === 'Notifications' && likeNotification.length > 0 && (
-                        <Popover>
-                          <PopoverTrigger asChild>
-  <Button size='icon' className='rounded-full h-5 w-5 absolute bottom-6 left-6'>{likeNotification.length}</Button>
-
-                          </PopoverTrigger>
-                          <PopoverContent>
-                            <div>
-                              {
-                                likeNotification.length === 0 ? (<p>no new notification</p>) : 
-                                likeNotification.map((notification) => {
-                                  return (
-                                    <div key={notification.userId}>
-<Avatar>
-  <AvatarImage src={notification.userDetails?.profilePicture}/>
-  <p className="text-sm"><span className="font-bold">{notification.userDetails?.username}</span> liked your post</p>
-</Avatar>
-                                      </div>
-                                  )
-                                })
-                              }
-                            </div>
-                          </PopoverContent>
-                        </Popover> 
-                        
-                      )
-                    }
                   </span>
                   {isActiveLink(item.link) && (
                     <div className="ml-auto w-2 h-2 bg-purple-600 rounded-full hidden lg:block" />
@@ -239,15 +287,17 @@ const Sidebar = () => {
           </button>
         </div>
       </aside>
+      
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-30 px-2 py-2 shadow-lg">
         <div className="flex justify-around items-center max-w-md mx-auto">
           {navItems.slice(0, 5).map((item, index) => {
-            const baseClasses = `flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 ${
+            const baseClasses = `flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 relative ${
               item.type === "link" && isActiveLink(item.link)
                 ? "text-purple-600"
                 : "text-gray-500 hover:text-gray-700"
             }`;
+            
             if (item.type === "link") {
               return (
                 <Link key={index} to={item.link} className={baseClasses}>
@@ -257,6 +307,12 @@ const Sidebar = () => {
                   </span>
                   {isActiveLink(item.link) && (
                     <div className="absolute -top-1 w-1 h-1 bg-purple-600 rounded-full" />
+                  )}
+                  {/* Mobile notification badge */}
+                  {item.isNotification && likeNotification.length > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 border border-white">
+                      {likeNotification.length}
+                    </div>
                   )}
                 </Link>
               );
@@ -276,7 +332,7 @@ const Sidebar = () => {
             }
           })}
           <Link
-            to={`/profile/${user._id}`} // Fixed: Correct route to match /profile/:id
+            to={`/profile/${user._id}`}
             className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 ${
               isActiveLink(`/profile/${user._id}`)
                 ? "text-purple-600"

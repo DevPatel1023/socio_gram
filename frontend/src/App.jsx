@@ -56,36 +56,41 @@ const browserRouter = createBrowserRouter([
 ]);
 
 function App() {
-   const { user } = useSelector(store => store.auth);
-  const { socket } = useSelector(store => store.socketio);
+  const { user } = useSelector((store) => store.auth);
+  const { socket } = useSelector((store) => store.socketio);
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (user) {
-      const socketio = io('http://localhost:8000', {
+      const socketio = io("http://localhost:8000", {
         query: {
-          userId: user?._id
+          userId: user?._id,
         },
-        transports: ['websocket']
+        transports: ["websocket"],
       });
       dispatch(setSocket(socketio));
 
       // listen all the events
 
       // onlineUsers get and dispatch
-      socketio.on('getOnlineUsers', (onlineUsers) => {
+      socketio.on("getOnlineUsers", (onlineUsers) => {
         dispatch(setOnlineUsers(onlineUsers));
       });
-      
+
       // notification event
-      socketio.on('notification', (notification) => {
+      socketio.on("notification", (notification) => {
         dispatch(setLikeNotification(notification));
+      });
+
+      // postUpdated - like/dislike real-time updates
+      socketio.on("postUpdated", (updatedPost) => {
+        dispatch({ type: "posts/updatePost", payload: updatedPost });
       });
 
       return () => {
         socketio.close();
         dispatch(setSocket(null));
-      }
+      };
     } else if (socket) {
       socket.close();
       dispatch(setSocket(null));

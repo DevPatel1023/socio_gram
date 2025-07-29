@@ -49,12 +49,25 @@ const Post = ({ post }) => {
       );
       if (res.data.success) {
         const updatedPost = res.data.post;
+
+        // Update Redux store with updated post
+        const updatedPostData = posts.map((p) =>
+  p._id === updatedPost._id ? updatedPost : p
+);
+
+
+        dispatch(setPosts(updatedPostData));
+
         setLikesCount(updatedPost.likes.length);
         setIsLiked(updatedPost.likes.includes(user._id));
+
         toast.success(
           res.data.message ||
             `${action.charAt(0).toUpperCase() + action.slice(1)}d successfully`
         );
+
+        console.log("posts before update:", posts);
+        console.log("updatedPost:", updatedPost);
       }
     } catch (error) {
       console.error("Like/Dislike error:", error);
@@ -169,9 +182,7 @@ const Post = ({ post }) => {
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage
-              src={
-                post.author?.profilePicture
-              }
+              src={post.author?.profilePicture}
               alt={`${post.author?.username || "User"}'s avatar`}
             />
             <AvatarFallback className="text-xs font-medium">
@@ -179,11 +190,18 @@ const Post = ({ post }) => {
             </AvatarFallback>
           </Avatar>
           <div className="flex items-center gap-2">
-           <Link className="cursor-pointer" to={`/profile/${post.author?._id}`}><h1 className="text-sm font-semibold">
-              {post.author?.username || "Unknown"}
-            </h1></Link>
+            <Link
+              className="cursor-pointer"
+              to={`/profile/${post.author?._id}`}
+            >
+              <h1 className="text-sm font-semibold">
+                {post.author?.username || "Unknown"}
+              </h1>
+            </Link>
             <span className="text-gray-500 text-xs">•</span>
-            {user?._id === post.author?._id &&(<Badge variant='secondary'>Author</Badge>)}
+            {user?._id === post.author?._id && (
+              <Badge variant="secondary">Author</Badge>
+            )}
           </div>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -260,10 +278,7 @@ const Post = ({ post }) => {
             disabled={!user}
           >
             {isLiked ? (
-              <FaHeart
-                size="24"
-                className="text-red-500 cursor-pointer "
-              />
+              <FaHeart size="24" className="text-red-500 cursor-pointer " />
             ) : (
               <FaRegHeart
                 size="24"
@@ -298,7 +313,6 @@ const Post = ({ post }) => {
           disabled={!user}
         >
           {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
-
         </button>
       </div>
 

@@ -1,11 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Post from "./Post";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { updatePost } from "../redux/postSlice";
 
 const Posts = () => {
   const { posts } = useSelector((store) => store.post);
-  
-  // Add null check and loading state
+  const { socket } = useSelector((store) => store.socketio);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen to 'postUpdated' event
+    socket.on("postUpdated", (updatedPost) => {
+      dispatch(updatePost(updatedPost));
+    });
+
+    // Cleanup
+    return () => {
+      socket.off("postUpdated");
+    };
+  }, [socket, dispatch]);
+
   if (!posts) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -13,8 +29,7 @@ const Posts = () => {
       </div>
     );
   }
-  
-  // Handle empty posts array
+
   if (posts.length === 0) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -22,14 +37,24 @@ const Posts = () => {
       </div>
     );
   }
-  
+
+  const validPosts = posts.filter(
+    (post) => post && post._id && Array.isArray(post.likes)
+  );
+
   return (
-    <div className=" w-full space-y-4">
-      {posts.map((post) => (
-        <div key={post._id} className="flex justify-center">
-          <Post post={post} />
+    <div className="w-full space-y-4">
+      {validPosts.length > 0 ? (
+        validPosts.map((post) => (
+          <div key={post._id} className="flex justify-center">
+            <Post post={post} />
+          </div>
+        ))
+      ) : (
+        <div className="flex justify-center items-center py-8">
+          <div className="text-gray-500">No valid posts found</div>
         </div>
-      ))}
+      )}
     </div>
   );
 };
