@@ -27,7 +27,7 @@ const ProfileIconBar = ({ tabChangeFun, activeTab }) => {
         </div>
 
         {/* saved */}
-        <div className={iconStyle("saved")} onClick={() => tabChangeFun("saved")}>
+        <div className={iconStyle("bookmarks")} onClick={() => tabChangeFun("bookmarks")}>
           <Bookmark size={24} />
           <span className="absolute top-[30px] text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             Saved

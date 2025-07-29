@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setSocket } from "./redux/socketSlice";
 import { setOnlineUsers } from "./redux/chatSlice";
 import { setLikeNotification } from "./redux/rtnSlice";
+import Search from "./components/Search";
 
 const browserRouter = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const browserRouter = createBrowserRouter([
       {
         path: "/profile/:id",
         element: <Profile />,
+      },
+      {
+        path: "/search",
+        element: <Search />,
       },
       {
         path: "/profile/edit",

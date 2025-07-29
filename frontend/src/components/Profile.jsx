@@ -26,6 +26,7 @@ const Profile = () => {
     setActiveTab(tab);
   };
 
+  console.log(userProfile.bookmarks);
   const displayedContent =
     activeTab === "posts"
       ? userProfile?.posts
@@ -233,7 +234,7 @@ const Profile = () => {
             ))
           ) : (
             <p className="text-center col-span-3 text-gray-500 mt-6">
-              {activeTab === "saved"
+              {activeTab === "bookmarks"
                 ? "No saved posts yet."
                 : activeTab === "reels" || activeTab === "tagged"
                 ? "This feature is coming soon!"
