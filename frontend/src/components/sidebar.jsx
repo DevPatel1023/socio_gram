@@ -181,7 +181,16 @@ const Sidebar = () => {
                             <div>
                               {
                                 likeNotification.length === 0 ? (<p>no new notification</p>) : 
-                                likeNotification.map()
+                                likeNotification.map((notification) => {
+                                  return (
+                                    <div key={notification.userId}>
+<Avatar>
+  <AvatarImage src={notification.userDetails?.profilePicture}/>
+  <p className="text-sm"><span className="font-bold">{notification.userDetails?.username}</span> liked your post</p>
+</Avatar>
+                                      </div>
+                                  )
+                                })
                               }
                             </div>
                           </PopoverContent>
