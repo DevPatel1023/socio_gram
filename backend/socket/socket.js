@@ -25,8 +25,6 @@ io.on('connection',(socket)=>{
     const userId = socket.handshake.query.userId;
     if(userId && userId !== "undefined") { // Added check for "undefined" string
         userSocketMap[userId] = socket.id;
-        console.log('User connected:', userId, 'Socket ID:', socket.id);
-        console.log('Current user socket map:', userSocketMap);
     }
 
     // Emit online users to all connected clients
@@ -36,8 +34,6 @@ io.on('connection',(socket)=>{
         console.log('User disconnected:', userId, 'Socket ID:', socket.id);
         if(userId && userId !== "undefined") {
             delete userSocketMap[userId];
-            console.log('User removed from socket map:', userId);
-            console.log('Updated user socket map:', userSocketMap);
         }
         io.emit('getOnlineUsers', Object.keys(userSocketMap));
     });

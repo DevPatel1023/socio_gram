@@ -153,6 +153,7 @@ export const likepost = async (req, res) => {
                 userId: likeuserId,
                 userDetails: user,
                 postId,
+                post,
                 message: 'your post was liked'
             }
             const postOwnerSocketId = getRecieverSocketId(postOwnerId);

@@ -15,6 +15,7 @@ import { setSocket } from "./redux/socketSlice";
 import { setOnlineUsers } from "./redux/chatSlice";
 import { setLikeNotification } from "./redux/rtnSlice";
 import Search from "./components/Search";
+import Notification from "./components/Notification";
 
 const browserRouter = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const browserRouter = createBrowserRouter([
       {
         path: "/search",
         element: <Search />,
+      },
+      {
+        path: "/notifications",
+        element: <Notification />,
       },
       {
         path: "/profile/edit",
