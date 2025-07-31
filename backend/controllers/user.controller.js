@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import  cloudinary  from '../utils/cloudinary.js';
 import getDataUri from "../utils/datauri.js";
+import { log } from "console";
 
 export const register = async (req, res) => {
     try {
@@ -290,3 +291,13 @@ export const getInboxUsers = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
+
+// export const findSearchedUsers = async(req,res) => {
+//     try {
+//         const searchUserQuery = req.body ;
+        
+//     } catch (error) {
+//         console.log('error finding users',error);
+//     }
+// }

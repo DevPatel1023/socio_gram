@@ -16,36 +16,66 @@ import { setOnlineUsers } from "./redux/chatSlice";
 import { setLikeNotification } from "./redux/rtnSlice";
 import Search from "./components/Search";
 import Notification from "./components/Notification";
+import ExplorePostPage from "./components/ExplorePostPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const browserRouter = createBrowserRouter([
   {
     // Routing for application's structure and all pass down the components in children to render
     path: "/",
-    element: <MainLayout />,
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: 
+        <ProtectedRoute>
+        <Home />
+      </ProtectedRoute>,
       },
       {
         path: "/profile/:id",
-        element: <Profile />,
+        element: 
+        <ProtectedRoute>
+        <Profile />,
+      </ProtectedRoute>
+      },
+      {
+        path: "/explore",
+        element: 
+        <ProtectedRoute>
+        <ExplorePostPage />,
+      </ProtectedRoute>
       },
       {
         path: "/search",
-        element: <Search />,
+        element: 
+        <ProtectedRoute>
+        <Search />,
+      </ProtectedRoute>
       },
       {
         path: "/notifications",
-        element: <Notification />,
+        element: 
+        <ProtectedRoute>
+        <Notification />,
+      </ProtectedRoute>
       },
       {
         path: "/profile/edit",
-        element: <EditProfile />,
+        element: 
+        <ProtectedRoute>
+        <EditProfile />,
+      </ProtectedRoute>
       },
       {
         path: "/inbox",
-        element: <MessagePage />,
+        element: <ProtectedRoute>
+        <MessagePage />
+      </ProtectedRoute>,
         children: [
           {
             path: ":id",
