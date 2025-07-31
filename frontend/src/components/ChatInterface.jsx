@@ -22,12 +22,16 @@ const ChatInterface = () => {
   // real time message call
   useGetRealTimeMsg();
 
-  const { userProfile, user, selectedUserInbox } = useSelector((state) => state.auth);
+  const { userProfile, user, selectedUserInbox } = useSelector(
+    (state) => state.auth
+  );
   const { messages } = useSelector((state) => state.chat);
 
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
+  const { onlineUsers } = useSelector((store) => store.chat);
+  const isOnline = onlineUsers?.includes(userProfile?._id);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -46,7 +50,7 @@ const ChatInterface = () => {
     if (!message.trim()) return;
 
     const originalMessage = message;
-    setMessage(""); 
+    setMessage("");
 
     try {
       const res = await axios.post(
@@ -103,21 +107,30 @@ const ChatInterface = () => {
                 {userProfile?.username?.charAt(0)?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+           {isOnline && ( <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>)}
           </div>
 
           <div>
             <h1 className="font-semibold text-gray-900">
               {userProfile?.username}
             </h1>
-            <p className="text-sm text-gray-500">Active now</p>
+            {isOnline && <p className="text-sm text-gray-500">Active now</p>}
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <Phone size={20} className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors" />
-          <Video size={20} className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors" />
-          <Info size={20} className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors" />
+          <Phone
+            size={20}
+            className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors"
+          />
+          <Video
+            size={20}
+            className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors"
+          />
+          <Info
+            size={20}
+            className="text-gray-600 cursor-pointer hover:text-gray-800 transition-colors"
+          />
         </div>
       </div>
 
@@ -135,8 +148,12 @@ const ChatInterface = () => {
                   {userProfile?.username?.charAt(0)?.toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <h3 className="font-semibold text-gray-900 mb-1">{userProfile?.username}</h3>
-              <p className="text-sm text-gray-500 mb-2">{userProfile?.bio || "No bio available"}</p>
+              <h3 className="font-semibold text-gray-900 mb-1">
+                {userProfile?.username}
+              </h3>
+              <p className="text-sm text-gray-500 mb-2">
+                {userProfile?.bio || "No bio available"}
+              </p>
               <p className="text-xs text-gray-400">Start your conversation</p>
             </div>
           )}
@@ -152,18 +169,31 @@ const ChatInterface = () => {
 
               if (msg.senderId) {
                 if (typeof msg.senderId === "object" && msg.senderId._id) {
-                  isCurrentUser = msg.senderId._id.toString() === user?._id?.toString();
+                  isCurrentUser =
+                    msg.senderId._id.toString() === user?._id?.toString();
                 } else if (typeof msg.senderId === "string") {
-                  isCurrentUser = msg.senderId.toString() === user?._id?.toString();
+                  isCurrentUser =
+                    msg.senderId.toString() === user?._id?.toString();
                 }
               }
 
               return (
-                <div key={msg._id || `msg-${index}`} className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}>
-                  <div className={`px-4 py-2 rounded-2xl max-w-xs break-words ${
-                    isCurrentUser ? "bg-blue-500 text-white rounded-tr-md" : "bg-gray-200 text-gray-900 rounded-tl-md"
-                  }`}>
-                    <p className="text-sm">{msg.messages || msg.message || "No content"}</p>
+                <div
+                  key={msg._id || `msg-${index}`}
+                  className={`flex ${
+                    isCurrentUser ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`px-4 py-2 rounded-2xl max-w-xs break-words ${
+                      isCurrentUser
+                        ? "bg-blue-500 text-white rounded-tr-md"
+                        : "bg-gray-200 text-gray-900 rounded-tl-md"
+                    }`}
+                  >
+                    <p className="text-sm">
+                      {msg.messages || msg.message || "No content"}
+                    </p>
                   </div>
                 </div>
               );
@@ -186,8 +216,14 @@ const ChatInterface = () => {
               className="w-full px-4 py-2.5 pr-20 bg-gray-100 border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all duration-200"
             />
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-              <Smile size={16} className="text-gray-500 cursor-pointer hover:text-gray-700" />
-              <Image size={16} className="text-gray-500 cursor-pointer hover:text-gray-700" />
+              <Smile
+                size={16}
+                className="text-gray-500 cursor-pointer hover:text-gray-700"
+              />
+              <Image
+                size={16}
+                className="text-gray-500 cursor-pointer hover:text-gray-700"
+              />
             </div>
           </div>
 

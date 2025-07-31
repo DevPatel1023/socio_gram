@@ -94,7 +94,7 @@ export const getUserStory = async(req,res) => {
         const myStories = await Story.find({
             user : userId,
             createdAt : { $gte : new Date(Date.now() - 24 * 60 * 60 * 1000)},
-        });
+        }).populate('user','username profilePicture _id');
         return res.status(200).json({
             success : true ,
             myStories
