@@ -293,11 +293,26 @@ export const getInboxUsers = async (req, res) => {
 };
 
 
-// export const findSearchedUsers = async(req,res) => {
-//     try {
-//         const searchUserQuery = req.body ;
-        
-//     } catch (error) {
-//         console.log('error finding users',error);
-//     }
-// }
+export const findSearchedUsers = async(req,res) => {
+    try {
+        const query = req.query.q;
+
+        if(!query || query.trim() === ''){
+            return res.status(400).json({
+                error: 'Search query is required'
+            });
+        }
+
+        const users = await User.find({
+            $or: [
+                { username: { $regex: query, $options: 'i' } },
+                { name: { $regex: query, $options: 'i' } }
+            ]
+        }).select('_id username name profilePicture');
+
+        res.json(users); // returns array
+    } catch (error) {
+        console.error('Error finding users:', error);
+        res.status(500).json({ error: 'Server error' }); // <-- FIXED
+    }
+}
