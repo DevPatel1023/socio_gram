@@ -15,5 +15,4 @@ router.route('/followorunfollow/:id').post(isAuthenticated,followOrUnfollow);
 router.route('/inbox').get(isAuthenticated,getInboxUsers);
 router.route('/users').get(isAuthenticated,findSearchedUsers);
 
-
 export default router;
